@@ -18,6 +18,8 @@ export type IconName =
   | 'reset'
   | 'print'
   | 'bars'
+  | 'pin'
+  | 'cursor'
   | 'warning'
   | 'flask'
   | 'arrowUp'
@@ -94,6 +96,13 @@ const GLYPHS: Record<IconName, ReactNode> = {
     </>
   ),
   bars: <path d="M2.6 13.2V9.1M6.1 13.2V4.6M9.6 13.2V7.2M13.1 13.2V2.8" />,
+  pin: (
+    <>
+      <path d="M8 14.1s4.3-3.7 4.3-6.4a4.3 4.3 0 1 0-8.6 0C3.7 10.4 8 14.1 8 14.1Z" />
+      <path d="M8 8.1h.01" />
+    </>
+  ),
+  cursor: <path d="M4.2 3.4 12.6 7.3 8.9 8.8l-1.5 3.7-3.2-9.1Z" />,
   warning: (
     <>
       <path d="M8 2.9 14 13.1H2z" />

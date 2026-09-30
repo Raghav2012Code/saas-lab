@@ -1,5 +1,8 @@
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { StatTile } from '../ui/StatTile';
+import { useState } from 'react';
+
+import { useSeriesToggle } from '../../hooks/useSeriesToggle';
 import { Panel, SectionHeading } from '../ui/Panel';
 import { monthLabels } from '../../lib/labels';
 import { present } from '../../lib/levers';
@@ -11,6 +14,14 @@ import { Tile, TileGrid } from './shared';
 /** Forward view: the same model, projected, with nothing smoothed or guessed. */
 export function ProjectionsTab() {
   const { simulation, derived, preview, fmt, horizon, model } = useModel();
+  // A single focused month, shared by the charts and the table, so hovering
+  // either one traces the other.
+  // Two independent links between the table and the charts: hovering a row moves
+  // the chart crosshair, and hovering a chart highlights the row. Keeping them in
+  // separate state stops each one overriding the other.
+  const [rowHover, setRowHover] = useState<number | null>(null);
+  const [chartHover, setChartHover] = useState<number | null>(null);
+  const seriesToggle = useSeriesToggle();
 
   const live = preview?.derived ?? derived;
   const liveSimulation = preview?.simulation ?? simulation;
@@ -114,6 +125,11 @@ export function ProjectionsTab() {
             ariaLabel={`MRR from ${fmt.money(today.mrr)} today to ${fmt.money(end.mrr)} in month ${horizon}.`}
             yFormat={(value) => fmt.moneyCompact(value)}
             valueFormat={(value) => fmt.money(value)}
+            changeFormat={(value) => fmt.moneyCompact(value)}
+            externalIndex={rowHover}
+            onIndexChange={setChartHover}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
             marker={live.health.monthsToBreakEven.value !== null && live.health.monthsToBreakEven.value <= horizon ? { index: live.health.monthsToBreakEven.value, label: 'break-even' } : null}
           />
         </Panel>
@@ -128,6 +144,11 @@ export function ProjectionsTab() {
             ariaLabel={`Customers from ${fmt.number(today.customers)} today to ${fmt.number(end.customers)} in month ${horizon}.`}
             yFormat={(value) => fmt.numberCompact(value)}
             valueFormat={(value) => fmt.number(value)}
+            changeFormat={(value) => fmt.numberCompact(value)}
+            externalIndex={rowHover}
+            onIndexChange={setChartHover}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
           />
         </Panel>
 
@@ -155,6 +176,11 @@ export function ProjectionsTab() {
             ariaLabel={`Revenue reaching ${fmt.money(end.revenue)} against total costs of ${fmt.money(costs[costs.length - 1] ?? 0)} in month ${horizon}.`}
             yFormat={(value) => fmt.moneyCompact(value)}
             valueFormat={(value) => fmt.money(value)}
+            changeFormat={(value) => fmt.moneyCompact(value)}
+            externalIndex={rowHover}
+            onIndexChange={setChartHover}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
           />
         </Panel>
 
@@ -166,6 +192,11 @@ export function ProjectionsTab() {
             includeZero={false}
             yFormat={(value) => fmt.moneyCompact(value)}
             valueFormat={(value) => fmt.money(value)}
+            changeFormat={(value) => fmt.moneyCompact(value)}
+            externalIndex={rowHover}
+            onIndexChange={setChartHover}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
             marker={
               cashMarker !== null && cashMarker <= horizon
                 ? { index: Math.round(cashMarker), label: 'cash out' }
@@ -180,7 +211,13 @@ export function ProjectionsTab() {
         description="Raw numbers, so you can check any row against the rest of the model."
         flush
       >
-        <ProjectionTable points={points} />
+        <ProjectionTable
+          points={points}
+          cashOutMonth={cashMarker}
+          breakEvenMonth={live.health.monthsToBreakEven.value}
+          linkedIndex={chartHover}
+          onHoverIndex={setRowHover}
+        />
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5">
           <p className="text-xs text-muted">
             Cumulative net cash flow over {horizon} months:{' '}

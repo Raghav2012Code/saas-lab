@@ -1,17 +1,21 @@
-import { useMemo, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useMemo, useState, type KeyboardEvent } from 'react';
 
 import { useMeasure } from '../../hooks/useMeasure';
 import {
   Axes,
+  ChartHint,
   ChartLegend,
   ChartReadout,
   ChartTooltip,
   DEFAULT_PADDING,
+  HoverBand,
   areaPath,
   labelStride,
   linePath,
   nearestIndex,
   niceDomain,
+  tooltipPlacement,
+  toUserX,
   valueExtent,
 } from './core';
 
@@ -35,15 +39,27 @@ interface LineChartProps {
   yFormat: (value: number) => string;
   /** exact values in the tooltip */
   valueFormat: (value: number) => string;
+  /** formats the movement since the previous period */
+  changeFormat?: (value: number) => string;
   /** vertical marker for an event such as break-even */
   marker?: { index: number; label: string } | null;
-  /** short text describing the final point, shown when nothing is hovered */
-  summaryPrefix?: string;
+  /** series hidden by the user, toggled from the legend */
+  hiddenSeries?: string[];
+  onToggleSeries?: (id: string) => void;
+  /** index highlighted from outside (e.g. hovering a table row) */
+  externalIndex?: number | null;
+  /** reports the hovered index back, so a table can follow along */
+  onIndexChange?: (index: number | null) => void;
 }
 
 /**
- * Multi-series line/area chart with crosshair hover, touch support and keyboard
- * inspection. Values are supplied by the caller so the chart holds no model logic.
+ * Multi-series line/area chart.
+ *
+ * Interaction is the point of this component, not decoration: a hovered band
+ * marks the column, the card carries the period, every series value and the
+ * movement since the previous period, a click pins the readout so it can be
+ * read (and survives on touch), and the whole thing is operable by keyboard.
+ * The card is shown at every width — it repositions rather than disappearing.
  */
 export function LineChart({
   series,
@@ -53,23 +69,35 @@ export function LineChart({
   includeZero = true,
   yFormat,
   valueFormat,
+  changeFormat,
   marker,
-  summaryPrefix,
+  hiddenSeries = [],
+  onToggleSeries,
+  externalIndex = null,
+  onIndexChange,
 }: LineChartProps) {
   const [container, width] = useMeasure<HTMLDivElement>();
-  const [active, setActive] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [pinned, setPinned] = useState<number | null>(null);
 
   const chartWidth = Math.max(width, 260);
   const count = labels.length;
+  // Hovering always wins, so a pinned point never blocks exploring; the pin
+  // reappears as soon as the pointer leaves.
+  const active = externalIndex ?? hovered ?? pinned;
+  const showingPin = pinned !== null && hovered === null && externalIndex === null;
+
+  const visible = series.filter((item) => !hiddenSeries.includes(item.id));
+  const drawable = visible.length > 0 ? visible : series;
 
   const geometry = useMemo(() => {
-    const [dataMin, dataMax] = valueExtent(series.map((item) => item.values), includeZero);
+    const [dataMin, dataMax] = valueExtent(drawable.map((item) => item.values), includeZero);
     const { domain, ticks } = niceDomain(dataMin, dataMax, 4);
 
     const longest = ticks.reduce((max, tick) => Math.max(max, yFormat(tick).length), 0);
     const padding = {
       ...DEFAULT_PADDING,
-      left: Math.min(78, Math.max(38, longest * 6.3 + 12)),
+      left: Math.min(78, Math.max(38, longest * 6.4 + 12)),
     };
 
     const innerWidth = chartWidth - padding.left - padding.right;
@@ -81,23 +109,25 @@ export function LineChart({
       innerWidth,
       innerHeight,
       ticks,
+      step,
       x: (index: number) => padding.left + (count <= 1 ? innerWidth / 2 : index * step),
       y: (value: number) =>
         padding.top + innerHeight - ((value - domain[0]) / (domain[1] - domain[0])) * innerHeight,
       zeroY: padding.top + innerHeight - ((0 - domain[0]) / (domain[1] - domain[0])) * innerHeight,
     };
-  }, [chartWidth, count, height, includeZero, series, yFormat]);
+  }, [chartWidth, count, drawable, height, includeZero, yFormat]);
 
-  const { padding, x, y, ticks, innerHeight } = geometry;
+  const { padding, x, y, ticks, innerHeight, step } = geometry;
 
-  const findIndex = (event: PointerEvent<SVGSVGElement>): number | null => {
-    const rect = event.currentTarget.getBoundingClientRect();
+  const report = (index: number | null) => {
+    setHovered(index);
+    onIndexChange?.(index);
+  };
+
+  const indexAt = (clientX: number, target: Element): number | null => {
     if (count === 0) return null;
-    return nearestIndex(
-      (index) => x(index) - rect.left,
-      count,
-      event.clientX - rect.left,
-    );
+    const rect = target.getBoundingClientRect();
+    return nearestIndex(x, count, toUserX(clientX, rect, chartWidth));
   };
 
   const onKeyDown = (event: KeyboardEvent<SVGSVGElement>) => {
@@ -105,36 +135,56 @@ export function LineChart({
     const current = active ?? count - 1;
     if (event.key === 'ArrowRight') {
       event.preventDefault();
-      setActive(Math.min(count - 1, current + 1));
+      report(Math.min(count - 1, current + 1));
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
-      setActive(Math.max(0, current - 1));
+      report(Math.max(0, current - 1));
     } else if (event.key === 'Home') {
       event.preventDefault();
-      setActive(0);
+      report(0);
     } else if (event.key === 'End') {
       event.preventDefault();
-      setActive(count - 1);
+      report(count - 1);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const target = active ?? count - 1;
+      setPinned(pinned === target ? null : target);
     } else if (event.key === 'Escape') {
-      setActive(null);
+      setPinned(null);
+      report(null);
     }
   };
 
   const readIndex = active ?? count - 1;
 
-  const tooltipItems = series.map((item) => {
+  const items = (active === null ? series : drawable).map((item) => {
     const value = item.values[readIndex];
+    const previous = readIndex > 0 ? item.values[readIndex - 1] : null;
+    let change: string | null = null;
+    if (changeFormat && value !== null && value !== undefined && previous !== null && previous !== undefined) {
+      const delta = value - previous;
+      if (Math.abs(delta) > 1e-9) change = `${delta > 0 ? '+' : '-'}${changeFormat(Math.abs(delta))}`;
+    }
     return {
       id: item.id,
       label: item.label,
       value: value === null || value === undefined ? '\u2014' : valueFormat(value),
       color: item.color,
+      change,
     };
   });
 
+  const placement =
+    active !== null
+      ? tooltipPlacement(x(active), padding.top + 6, chartWidth, height, 208, 92)
+      : null;
+
   return (
     <div className="flex flex-col gap-2">
-      <ChartLegend items={series} />
+      <div className="flex items-start justify-between gap-3">
+        <ChartLegend items={series} onToggle={onToggleSeries} hidden={hiddenSeries} />
+        <ChartHint pinned={showingPin} />
+      </div>
 
       <div ref={container} className="relative">
         <svg
@@ -144,13 +194,20 @@ export function LineChart({
           role="img"
           aria-label={ariaLabel}
           tabIndex={0}
-          className="block max-w-full touch-none focus-visible:outline-2 focus-visible:outline-offset-2"
-          onPointerMove={(event) => setActive(findIndex(event))}
-          onPointerDown={(event) => setActive(findIndex(event))}
-          onPointerLeave={() => setActive(null)}
+          className="block max-w-full cursor-crosshair touch-none focus-visible:outline-2 focus-visible:outline-offset-2"
+          onPointerMove={(event) => report(indexAt(event.clientX, event.currentTarget))}
+          onPointerLeave={() => report(null)}
+          onClick={(event) => {
+            const index = indexAt(event.clientX, event.currentTarget);
+            setPinned(pinned === index ? null : index);
+          }}
           onKeyDown={onKeyDown}
           style={{ outlineColor: 'var(--ring)' }}
         >
+          {active !== null ? (
+            <HoverBand x={x(active)} width={step} top={padding.top} height={innerHeight} />
+          ) : null}
+
           <Axes
             width={chartWidth}
             height={height}
@@ -164,7 +221,7 @@ export function LineChart({
             emphasis={includeZero ? 0 : null}
           />
 
-          {series.map((item) => {
+          {visible.map((item) => {
             const points = item.values.flatMap((value, index) =>
               value === null || !Number.isFinite(value) ? [] : [[x(index), y(value)] as [number, number]],
             );
@@ -202,7 +259,7 @@ export function LineChart({
                 x={x(marker.index)}
                 y={padding.top + 9}
                 textAnchor="middle"
-                className="fill-accent text-[10px] font-medium"
+                className="fill-accent text-[11px] font-medium"
               >
                 {marker.label}
               </text>
@@ -219,24 +276,26 @@ export function LineChart({
                 stroke="var(--border-strong)"
                 strokeWidth={1}
               />
-              {series.map((item) => {
+              {drawable.map((item) => {
                 const value = item.values[active];
                 if (value === null || value === undefined) return null;
                 return (
-                  <circle
-                    key={item.id}
-                    cx={x(active)}
-                    cy={y(value)}
-                    r={3.5}
-                    fill="var(--surface)"
-                    stroke={item.color}
-                    strokeWidth={2}
-                  />
+                  <g key={item.id}>
+                    <circle cx={x(active)} cy={y(value)} r={5.5} fill={item.color} opacity={0.18} />
+                    <circle
+                      cx={x(active)}
+                      cy={y(value)}
+                      r={3.5}
+                      fill="var(--surface)"
+                      stroke={item.color}
+                      strokeWidth={2}
+                    />
+                  </g>
                 );
               })}
             </g>
           ) : (
-            series.map((item) => {
+            drawable.map((item) => {
               const value = item.values[count - 1];
               if (value === null || value === undefined) return null;
               return <circle key={item.id} cx={x(count - 1)} cy={y(value)} r={2.6} fill={item.color} />;
@@ -244,25 +303,31 @@ export function LineChart({
           )}
         </svg>
 
-        {active !== null && chartWidth >= 520 ? (
+        {placement ? (
           <ChartTooltip
-            x={x(active)}
-            y={padding.top}
-            containerWidth={chartWidth}
-            title={labels[active] ?? ''}
-            items={tooltipItems}
+            left={placement.left}
+            top={placement.top}
+            title={labels[readIndex] ?? ''}
+            subtitle={readIndex === 0 ? 'today' : `month ${readIndex} of ${count - 1}`}
+            items={items}
+            pinned={showingPin}
           />
         ) : null}
       </div>
 
-      <ChartReadout width={chartWidth}>
-        {summaryPrefix ? `${summaryPrefix} · ` : ''}
+      <ChartReadout>
+        {active === null ? (
+          <span className="text-subtle">Showing {labels[readIndex]}</span>
+        ) : (
+          <span className="text-accent-fg">{showingPin ? 'Pinned' : 'Inspecting'}</span>
+        )}
         <span className="text-fg">{labels[readIndex]}</span>
-        {tooltipItems.map((item) => (
+        {items.map((item) => (
           <span key={item.id}>
             {' · '}
-            {series.length > 1 ? `${item.label} ` : ''}
+            {items.length > 1 ? `${item.label} ` : ''}
             <span className="text-fg">{item.value}</span>
+            {item.change ? <span className="text-subtle"> {item.change}</span> : null}
           </span>
         ))}
       </ChartReadout>

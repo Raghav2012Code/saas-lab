@@ -1,4 +1,7 @@
+import { useState } from 'react';
+
 import { Icon } from '../ui/Icon';
+import { cx } from '../../lib/cx';
 
 export interface FunnelStage {
   id: string;
@@ -7,6 +10,8 @@ export interface FunnelStage {
   formatted: string;
   /** short note, e.g. the rate that produces this stage from the previous one */
   note?: string;
+  /** what did not make it through, revealed on hover */
+  dropOff?: string;
 }
 
 /**
@@ -19,6 +24,7 @@ export interface FunnelStage {
  * dressed up as an honest one.
  */
 export function FunnelChart({ stages, ariaLabel }: { stages: FunnelStage[]; ariaLabel: string }) {
+  const [active, setActive] = useState<string | null>(null);
   const max = Math.max(...stages.map((stage) => stage.value), 1);
   const logMax = Math.log10(1 + max);
 
@@ -27,10 +33,19 @@ export function FunnelChart({ stages, ariaLabel }: { stages: FunnelStage[]; aria
       {stages.map((stage, index) => {
         const share = Math.max(0.03, Math.min(1, Math.log10(1 + Math.max(stage.value, 0)) / logMax));
         const previous = stages[index - 1];
+        const isActive = active === stage.id;
         return (
-          <div key={stage.id}>
+          <div
+            key={stage.id}
+            onPointerEnter={() => setActive(stage.id)}
+            onPointerLeave={() => setActive(null)}
+            className={cx(
+              'rounded-sm px-1 transition-colors',
+              isActive && 'bg-surface-2',
+            )}
+          >
             {previous ? (
-              <div className="flex items-center gap-1.5 py-1 pl-1 text-xs text-subtle">
+              <div className="flex items-center gap-1.5 py-1 pl-0.5 text-xs text-subtle">
                 <Icon name="arrowDown" size={11} />
                 <span className="num">{stage.note}</span>
               </div>
@@ -50,12 +65,23 @@ export function FunnelChart({ stages, ariaLabel }: { stages: FunnelStage[]; aria
                   aria-hidden="true"
                 />
               </div>
+              {stage.dropOff ? (
+                <p
+                  className={cx(
+                    'text-xs transition-colors',
+                    isActive ? 'text-accent-fg' : 'text-subtle',
+                  )}
+                >
+                  {stage.dropOff}
+                </p>
+              ) : null}
             </div>
           </div>
         );
       })}
       <p className="pt-2 text-xs text-subtle">
-        Bar widths are logarithmic — this funnel is far too wide to draw to scale.
+        Bar widths are logarithmic — this funnel is far too wide to draw to scale. Hover a stage for the
+        drop-off.
       </p>
     </div>
   );

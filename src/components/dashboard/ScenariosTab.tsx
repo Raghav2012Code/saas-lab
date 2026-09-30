@@ -1,7 +1,11 @@
+import { useState } from 'react';
+
 import { LineChart, type LineSeries } from '../charts/LineChart';
+import { useSeriesToggle } from '../../hooks/useSeriesToggle';
 import { Icon } from '../ui/Icon';
 import { InlineNote, Panel, SectionHeading } from '../ui/Panel';
 import { Pill } from '../ui/Pill';
+import { cx } from '../../lib/cx';
 import { monthLabels } from '../../lib/labels';
 import { present } from '../../lib/levers';
 import { useModel } from '../../state/store';
@@ -28,6 +32,9 @@ interface Row {
  */
 export function ScenariosTab() {
   const { scenarios, fmt, horizon, model } = useModel();
+  const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const seriesToggle = useSeriesToggle();
   const base = scenarios.find((entry) => entry.id === 'base');
 
   const rows: Row[] = [
@@ -155,7 +162,10 @@ export function ScenariosTab() {
               <tr>
                 <th scope="col">Metric</th>
                 {scenarios.map((scenario) => (
-                  <th key={scenario.id} scope="col" className="num">
+                  <th key={scenario.id} scope="col" className={cx('num', hoveredColumn === scenario.id && 'col-active')}
+                    onPointerEnter={() => setHoveredColumn(scenario.id)}
+                    onPointerLeave={() => setHoveredColumn(null)}
+                  >
                     <span className="inline-flex items-center gap-1.5">
                       <span
                         className="h-2 w-2 rounded-full"
@@ -181,8 +191,8 @@ export function ScenariosTab() {
                 const worst = comparable.length > 0 ? Math.min(...comparable) : null;
                 const spread = best !== null && worst !== null && best !== worst;
                 return (
-                  <tr key={row.id}>
-                    <th scope="row">
+                  <tr key={row.id} onPointerEnter={() => setHoveredRow(row.id)} onPointerLeave={() => setHoveredRow(null)}>
+                    <th scope="row" className={cx(hoveredRow === row.id && 'row-active')}>
                       {row.label}
                       <span className="block text-xs font-normal text-subtle">{row.detail}</span>
                     </th>
@@ -194,7 +204,12 @@ export function ScenariosTab() {
                       return (
                         <td
                           key={scenario.id}
-                          className={`num ${isHigh ? 'text-fg-strong' : isLow ? 'text-subtle' : ''}`}
+                          className={cx(
+                            'num',
+                            hoveredColumn === scenario.id && 'col-active',
+                            hoveredRow === row.id && 'row-active',
+                            isHigh ? 'text-fg-strong' : isLow ? 'text-subtle' : '',
+                          )}
                         >
                           {value}
                           {isHigh ? <span className="pl-1 text-xs text-muted">high</span> : null}
@@ -218,6 +233,9 @@ export function ScenariosTab() {
             ariaLabel="MRR projection compared across conservative, base and aggressive assumptions."
             yFormat={(value) => fmt.moneyCompact(value)}
             valueFormat={(value) => fmt.money(value)}
+            changeFormat={(value) => fmt.moneyCompact(value)}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
           />
         </Panel>
         <Panel title="Cash by scenario" description="Where each set of assumptions leaves the bank balance.">
@@ -228,6 +246,9 @@ export function ScenariosTab() {
             includeZero={false}
             yFormat={(value) => fmt.moneyCompact(value)}
             valueFormat={(value) => fmt.money(value)}
+            changeFormat={(value) => fmt.moneyCompact(value)}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
           />
         </Panel>
       </div>

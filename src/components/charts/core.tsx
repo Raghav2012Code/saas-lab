@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 
 import { cx } from '../../lib/cx';
+import { Icon } from '../ui/Icon';
 
 export interface Padding {
   top: number;
@@ -97,40 +98,105 @@ export function nearestIndex(x: (index: number) => number, count: number, pixel:
   return best;
 }
 
+/**
+ * Converts a viewport X coordinate into the SVG's own coordinate space.
+ *
+ * `x()` in these charts returns SVG user units relative to the SVG's origin, so
+ * a raw `clientX - rect.left` only lines up when the SVG is rendered at exactly
+ * its viewBox width. `max-w-full` can scale it down, and subtracting rect.left
+ * from a user-unit value silently collapses the mapping to the last datum — so
+ * every chart goes through here.
+ */
+export function toUserX(clientX: number, rect: DOMRect | { left: number; width: number }, userWidth: number): number {
+  const rendered = rect.width > 0 ? rect.width : userWidth;
+  return (clientX - rect.left) * (userWidth / rendered);
+}
+
 /** Chooses how many x labels to draw so they never collide. */
 export function labelStride(count: number, width: number, perLabel = 54): number {
   const maxLabels = Math.max(2, Math.floor(width / perLabel));
   return Math.max(1, Math.ceil(count / maxLabels));
 }
 
-export function gridStroke(): string {
-  return 'var(--grid)';
+/**
+ * Clamps a tooltip so it always stays inside the chart, on both axes, whatever
+ * the chart's width. Returns a CSS translate and left/top in container pixels.
+ */
+export function tooltipPlacement(
+  x: number,
+  y: number,
+  containerWidth: number,
+  containerHeight: number,
+  cardWidth = 208,
+  cardHeight = 96,
+): { left: number; top: number; flip: boolean } {
+  const margin = 8;
+  const flip = x + margin + cardWidth > containerWidth;
+  const left = Math.min(
+    Math.max(flip ? x - margin - cardWidth : x + margin, margin),
+    Math.max(margin, containerWidth - cardWidth - margin),
+  );
+  const top = Math.min(Math.max(y, margin), Math.max(margin, containerHeight - cardHeight - margin));
+  return { left, top, flip };
 }
 
-/** Series key. Swatches carry the colour so the labels stay readable. */
+/** Series key. Doubles as the series toggle when `onToggle` is supplied. */
 export function ChartLegend({
   items,
   className,
+  onToggle,
+  hidden = [],
 }: {
   items: { id: string; label: string; color: string; dashed?: boolean }[];
   className?: string;
+  /** when present, each key becomes a show/hide toggle */
+  onToggle?: (id: string) => void;
+  hidden?: string[];
 }) {
   if (items.length < 2) return null;
+
   return (
     <ul className={cx('flex flex-wrap items-center gap-x-3 gap-y-1', className)}>
-      {items.map((item) => (
-        <li key={item.id} className="flex items-center gap-1.5 text-xs text-muted">
-          <span
-            className="h-0 w-3.5 border-t-2"
-            style={{
-              borderColor: item.color,
-              borderTopStyle: item.dashed ? 'dashed' : 'solid',
-            }}
-            aria-hidden="true"
-          />
-          {item.label}
-        </li>
-      ))}
+      {items.map((item) => {
+        const off = hidden.includes(item.id);
+        const body = (
+          <>
+            <span
+              className="h-0 w-3.5 border-t-2"
+              style={{
+                borderColor: off ? 'var(--subtle)' : item.color,
+                borderTopStyle: item.dashed ? 'dashed' : 'solid',
+              }}
+              aria-hidden="true"
+            />
+            <span className={cx(off && 'line-through')}>{item.label}</span>
+          </>
+        );
+
+        return (
+          <li key={item.id}>
+            {onToggle ? (
+              <button
+                type="button"
+                aria-pressed={!off}
+                onClick={() => onToggle(item.id)}
+                title={off ? `Show ${item.label}` : `Hide ${item.label}`}
+                className={cx(
+                  'flex items-center gap-1.5 rounded-sm px-1 text-xs transition-colors',
+                  off ? 'text-subtle' : 'text-muted',
+                  'hover:bg-surface-2 hover:text-fg focus-visible:bg-surface-2',
+                )}
+              >
+                {body}
+              </button>
+            ) : (
+              <span className={cx('flex items-center gap-1.5 text-xs', off ? 'text-subtle' : 'text-muted')}>
+                {body}
+              </span>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -177,7 +243,7 @@ export function Axes({
               x2={plotRight}
               y1={yPos}
               y2={yPos}
-              stroke={gridStroke()}
+              stroke="var(--grid)"
               strokeWidth={1}
               shapeRendering="crispEdges"
             />
@@ -186,7 +252,7 @@ export function Axes({
               y={yPos}
               textAnchor="end"
               dominantBaseline="middle"
-              className="num fill-subtle text-[10px]"
+              className="num fill-subtle text-[11px]"
             >
               {yFormat(tick)}
             </text>
@@ -214,7 +280,7 @@ export function Axes({
             x={x(index)}
             y={plotBottom + 16}
             textAnchor="middle"
-            className="num fill-subtle text-[10px]"
+            className="num fill-subtle text-[11px]"
           >
             {label}
           </text>
@@ -224,52 +290,115 @@ export function Axes({
   );
 }
 
+/**
+ * The vertical strip behind the hovered column. It is the thing that makes a
+ * chart read as interactive: without it a tooltip appears from nowhere.
+ */
+export function HoverBand({
+  x,
+  width,
+  top,
+  height,
+}: {
+  x: number;
+  width: number;
+  top: number;
+  height: number;
+}) {
+  return (
+    <rect
+      x={x - width / 2}
+      y={top}
+      width={Math.max(2, width)}
+      height={height}
+      fill="var(--surface-2)"
+      opacity={0.85}
+      aria-hidden="true"
+    />
+  );
+}
+
 export interface TooltipItem {
   id: string;
   label: string;
   value: string;
   color?: string;
+  /** change versus the previous period, already formatted */
+  change?: string | null;
+  /** true when a fall is the good outcome */
+  lowerIsBetter?: boolean;
 }
 
+/**
+ * The readout card. It carries the period, every series at that period, and the
+ * movement since the period before — which is what you actually want to know
+ * when you stop on a point.
+ */
 export function ChartTooltip({
-  x,
-  y,
-  containerWidth,
+  left,
+  top,
   title,
+  subtitle,
   items,
+  pinned,
 }: {
-  x: number;
-  y: number;
-  containerWidth: number;
+  left: number;
+  top: number;
   title: string;
+  subtitle?: string;
   items: TooltipItem[];
+  pinned?: boolean;
 }) {
-  const width = 176;
-  const flip = x + width / 2 + 12 > containerWidth;
-  const left = flip ? undefined : x + 12;
-  const right = flip ? containerWidth - x + 12 : undefined;
-
   return (
     <div
       className="chart-tip"
-      style={{ left, right, top: Math.max(4, y - 8), width }}
+      style={{ left, top, width: 208 }}
       role="presentation"
+      data-pinned={pinned ? 'true' : 'false'}
     >
-      <p className="num text-subtle">{title}</p>
-      <ul className="mt-1 flex flex-col gap-0.5">
+      <p className="flex items-baseline justify-between gap-2">
+        <span className="num text-xs font-medium text-fg-strong">{title}</span>
+        {pinned ? (
+          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-accent-fg">
+            <Icon name="pin" size={10} />
+            pinned
+          </span>
+        ) : null}
+      </p>
+      {subtitle ? <p className="num text-[11px] text-subtle">{subtitle}</p> : null}
+
+      <ul className="mt-1.5 flex flex-col gap-1">
         {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between gap-2">
-            <span className="flex min-w-0 items-center gap-1.5">
+          <li key={item.id} className="flex items-baseline justify-between gap-2">
+            <span className="flex min-w-0 items-baseline gap-1.5">
               {item.color ? (
                 <span
-                  className="h-2 w-2 shrink-0 rounded-full"
+                  className="h-2 w-2 shrink-0 translate-y-[-1px] rounded-full"
                   style={{ backgroundColor: item.color }}
                   aria-hidden="true"
                 />
               ) : null}
               <span className="truncate text-muted">{item.label}</span>
             </span>
-            <span className="num shrink-0 text-fg-strong">{item.value}</span>
+            <span className="flex shrink-0 items-baseline gap-1.5">
+              <span className="num text-fg-strong">{item.value}</span>
+              {item.change ? (
+                <span
+                  className={cx(
+                    'num text-[10px]',
+                    item.change.startsWith('-')
+                      ? item.lowerIsBetter
+                        ? 'text-success'
+                        : 'text-danger'
+                      : item.lowerIsBetter
+                        ? 'text-danger'
+                        : 'text-success',
+                  )}
+                >
+                  {item.change}
+                </span>
+              ) : null}
+            </span>
           </li>
         ))}
       </ul>
@@ -278,17 +407,33 @@ export function ChartTooltip({
 }
 
 /**
- * The readout line above every chart. On narrow screens it is the only way to
- * read exact values, so it is always rendered — and being fixed-height it never
- * shifts the layout when its contents change.
+ * The line under every chart. On a narrow chart it is the only place the exact
+ * values appear, so it is always rendered — and being fixed-height it never
+ * shifts the layout. It doubles as the pin indicator.
  */
-export function ChartReadout({ children, width }: { children: ReactNode; width: number }) {
+export function ChartReadout({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div
-      className={cx('num h-5 truncate text-xs text-muted', width < 520 && 'text-[11px]')}
+      className={cx('num flex h-6 items-center gap-1.5 truncate text-xs text-muted', className)}
       aria-live="polite"
     >
       {children}
     </div>
+  );
+}
+
+/** Shared hint so the interaction is discoverable rather than hidden. */
+export function ChartHint({ pinned, subject = 'point' }: { pinned: boolean; subject?: string }) {
+  return (
+    <span className="flex items-center gap-1 text-[11px] text-subtle">
+      <Icon name={pinned ? 'pin' : 'cursor'} size={11} />
+      {pinned ? `Click to unpin` : `Hover or click a ${subject}`}
+    </span>
   );
 }

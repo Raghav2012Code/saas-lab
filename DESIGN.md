@@ -132,18 +132,39 @@ text, every advisory carries a distinct icon, every benchmark carries a word.
 
 - **Layout.** Persistent assumptions rail (336px) + model surface. The rail is
   the control surface, not a settings page, and it never scrolls away from the
-  numbers it changes. On small screens it becomes a modal `<dialog>` drawer, so
-  Escape, focus trapping and the backdrop are native rather than reimplemented.
-- **Metrics first, then the why.** Sections run summary → advisories → revenue →
-  unit economics → growth → financial health → what-if. A founder sees the state
-  of the business before any methodology.
+  numbers it changes. On small screens it becomes a modal `<dialog>` drawer
+  (close button, backdrop dismissal, Escape), so focus trapping and the backdrop
+  are native rather than reimplemented.
+- **Charts are interactive, not pictures.** Every chart answers the question the
+  pointer is asking:
+  - a **hover band** marks the column you are on, so the crosshair is never
+    floating in space;
+  - the **readout card** carries the period, its position in the series, every
+    series value, and the **movement since the previous period** — the number you
+    actually want when you stop on a point;
+  - **click pins** the readout (the card takes the provisional hue) so a value can
+    be read, compared and kept; clicking the same point releases it, and hovering
+    always temporarily overrides a pin so exploring is never blocked;
+  - **legend keys toggle series**, in `aria-pressed` buttons rather than
+    decoration, and hidden series drop out of the axis domain too;
+  - an explicit **"Hover or click a point" hint** makes the affordance visible
+    instead of hidden;
+  - keyboard parity: arrows to step, Home/End to jump, Enter to pin, Escape to
+    release, with the same card driven through `aria-live`.
+  - the card is shown at **every width** and repositions to stay inside the
+    chart. It is never gated on the chart being wide.
+- **Tables are traceable.** A long table is unreadable without help, so:
+  - hovering a **column header** traces that column down the whole table;
+  - hovering a **row** highlights it and **drives the charts above**, and hovering
+    a chart highlights the matching row — one focused month, two views of it;
+  - every column header **explains itself** on hover or focus (formula plus
+    caveat), so the definitions live where the numbers are;
+  - the cash-out month and the break-even month are **marked in their rows**.
 - **Not every section is a card.** One bordered block holds the eight headline
   figures as a hairline grid; panels are reserved for charts, tables and tools.
 - **Components have full state matrices.** Inputs carry hover, focus-within,
   invalid, warning and scrubbing states. Buttons are ranked by importance
-  (primary/outline/quiet), not coloured by meaning. Charts expose hover, touch,
-  keyboard (arrows/Home/End/Escape) and a fixed-height readout that doubles as
-  the mobile tooltip.
+  (primary/outline/quiet), not coloured by meaning.
 - **No honest visual is allowed to lie.** The funnel spans three orders of
   magnitude, so its bars are logarithmic and the chart says so. A metric with no
   answer shows an em dash, a "Not applicable" pill and the reason why — never
@@ -183,6 +204,20 @@ and their resolutions:
 | Tab strip hid its last tab below ~430px | tab group wraps to a second line |
 | Hero figure could outgrow its tile at 320px | responsive value sizes |
 | Dead `EmptyState` component; disabled button carrying a tooltip | removed; Reset is always enabled |
+
+A second pass then found the defect behind "I can't hover over it":
+
+| Finding | Resolution |
+|---|---|
+| **The chart tooltip was gated behind `chartWidth >= 520`.** At a 1139px window every one of the four Overview charts was 249–400px wide, so no chart showed a detail card at all — only a thin readout line that read as static text. | gate removed; the card renders at every width and repositions to stay inside the chart |
+| **The hover index was always wrong.** `LineChart` subtracted `rect.left` from `x(index)`, which is already relative to the SVG's own origin, so `nearestIndex` compared `-341…7` against the pointer and always resolved to the last datum. Every hover silently showed the final month. | all three charts now convert through one `toUserX` helper that also accounts for `max-w-full` scaling |
+| A hovered column had no visible marker | hover band behind the crosshair, plus the dot gains a halo |
+| No way to hold a value on screen (or read one on touch) | click pins the readout; clicking the same point releases it; hovering overrides a pin temporarily |
+| Legends were static, so hidden-series support did not exist | legend keys are `aria-pressed` toggles; hidden series leave the axis domain |
+| Nothing said the charts were interactive | explicit "Hover or click a point" hint, and the readout reads `Inspecting` / `Pinned` |
+| Tables were inert: hover only tinted a row | column tracing, header explanations, row↔chart linking in both directions, cash-out and break-even markers in-row |
+| The funnel's bar had a `transition-[width]` | removed — data display does not animate layout properties |
+| New funnel drop-off text used `opacity-90` on `--subtle`, landing at 4.45:1 | opacity removed; the token pair passes, and the failure was caught by Lighthouse rather than by the token gate (which sees tokens, not local opacity modifiers) |
 
 Result: Lighthouse **Accessibility 100, Best Practices 100, SEO 100**, zero
 failures, in both themes.

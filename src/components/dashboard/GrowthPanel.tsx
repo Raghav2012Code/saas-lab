@@ -22,6 +22,10 @@ export function GrowthPanel() {
       label: 'Monthly visitors',
       value: model.monthlyVisitors,
       formatted: fmt.number(model.monthlyVisitors),
+      dropOff:
+        model.monthlyVisitors > breakdown.signups
+          ? `${fmt.number(model.monthlyVisitors - breakdown.signups, 1)} never start an account`
+          : undefined,
     },
     {
       id: 'signups',
@@ -29,6 +33,10 @@ export function GrowthPanel() {
       value: breakdown.signups,
       formatted: fmt.number(breakdown.signups, 1),
       note: `${fmt.percent(model.visitorToSignupPct)} of visitors`,
+      dropOff:
+        breakdown.signups > breakdown.paid
+          ? `${fmt.number(breakdown.signups - breakdown.paid, 1)} never pay`
+          : undefined,
     },
     {
       id: 'paid',

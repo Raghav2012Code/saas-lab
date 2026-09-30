@@ -3,6 +3,7 @@ import { LineChart, type LineSeries } from '../charts/LineChart';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
 import { monthLabels } from '../../lib/labels';
 import { present } from '../../lib/levers';
+import { useSeriesToggle } from '../../hooks/useSeriesToggle';
 import { useModel } from '../../state/store';
 import { HorizonControl } from './HorizonControl';
 
@@ -11,6 +12,7 @@ export function FinancialHealthPanel() {
   const { derived, simulation, preview, fmt, horizon } = useModel();
   const live = preview?.derived ?? derived;
   const liveSimulation = preview?.simulation ?? simulation;
+  const seriesToggle = useSeriesToggle();
 
   const points = liveSimulation.points.slice(0, horizon + 1);
   const labels = monthLabels(points);
@@ -61,7 +63,9 @@ export function FinancialHealthPanel() {
                 ? { index: Math.round(breakEvenMonth), label: 'cash out' }
                 : null
             }
-            summaryPrefix="Cash"
+            changeFormat={(value) => fmt.moneyCompact(value)}
+            hiddenSeries={seriesToggle.hidden}
+            onToggleSeries={seriesToggle.toggle}
           />
         </Panel>
 
@@ -73,7 +77,7 @@ export function FinancialHealthPanel() {
             yFormat={(value) => fmt.moneyCompact(value)}
             valueFormat={(value) => fmt.money(value)}
             signColors={{ positive: 'var(--success)', negative: 'var(--danger)' }}
-            summaryPrefix="Net cash flow"
+            changeFormat={(value) => fmt.moneyCompact(value)}
           />
         </Panel>
       </div>

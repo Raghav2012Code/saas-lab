@@ -683,6 +683,25 @@
     white-space: nowrap;
   }
 
+  /* Column tracing: follow one column across a long table. Opaque mixes keep
+     the sticky first column and header readable when they are tinted. */
+  .data-table td.col-active,
+  .data-table tbody th.col-active {
+    background-color: color-mix(in oklab, var(--brand) 6%, var(--surface));
+  }
+
+  .data-table thead th.col-active {
+    background-color: color-mix(in oklab, var(--brand) 9%, var(--surface-2));
+  }
+
+  /* Row tracing: the row a chart is currently inspecting. */
+  .data-table tbody tr.row-active td,
+  .data-table tbody tr.row-active th,
+  .data-table tbody tr.row-active td:first-child,
+  .data-table tbody tr.row-active th:first-child {
+    background-color: color-mix(in oklab, var(--brand) 11%, var(--surface));
+  }
+
   /* Two-column reference tables: nothing to right-align. */
   .data-table-text th,
   .data-table-text td {
@@ -782,6 +801,12 @@
     box-shadow: var(--shadow-overlay);
     pointer-events: none;
     font-size: var(--text-sm);
+  }
+
+  /* A pinned readout keeps its defined edge but gains the provisional hue, so
+     it is obvious the card is held rather than following the pointer. */
+  .chart-tip[data-pinned='true'] {
+    border-color: var(--accent);
   }
 
   /* ---------- range input (what-if levers) ---------- */

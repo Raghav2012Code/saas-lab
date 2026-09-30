@@ -2,6 +2,7 @@ import { LineChart, type LineSeries } from '../charts/LineChart';
 import { WaterfallChart } from '../charts/WaterfallChart';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
 import { monthLabels } from '../../lib/labels';
+import { useSeriesToggle } from '../../hooks/useSeriesToggle';
 import { useModel } from '../../state/store';
 import { HorizonControl } from './HorizonControl';
 
@@ -14,6 +15,7 @@ export function RevenuePanel() {
 
   const live = preview?.derived ?? derived;
   const liveSimulation = preview?.simulation ?? simulation;
+  const seriesToggle = useSeriesToggle();
   const points = liveSimulation.points.slice(0, horizon + 1);
   const labels = monthLabels(points);
 
@@ -57,7 +59,9 @@ export function RevenuePanel() {
           ariaLabel={`MRR projection over the next ${horizon} months, from ${fmt.money(today.mrr)} today to ${fmt.money(points[points.length - 1]?.mrr ?? today.mrr)}.`}
           yFormat={(value) => fmt.moneyCompact(value)}
           valueFormat={(value) => fmt.money(value)}
-          summaryPrefix="MRR"
+          changeFormat={(value) => fmt.moneyCompact(value)}
+          hiddenSeries={seriesToggle.hidden}
+          onToggleSeries={seriesToggle.toggle}
         />
       </Panel>
 

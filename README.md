@@ -22,16 +22,23 @@ payback, gross margin, runway), an MRR projection, next month's MRR bridge
 funnel with its conversion rates, a monthly P&L, and the what-if surface.
 
 **Projections** — 12, 24 or 36 months of MRR, customers, revenue against total costs,
-and cash balance, each with a month-by-month table you can export.
+and cash balance, each with a month-by-month table. Hovering a table row moves the
+crosshair on every chart; hovering a chart highlights the matching row; column headers
+trace their column and explain their formula.
 
-**Scenarios** — conservative, base and aggressive side by side. They are stated
-multipliers applied to your model, and each one lists exactly what it changed. Neither
-is presented as the right answer; the point is to see which assumptions matter.
+**Scenarios** — conservative, base and aggressive side by side, with the series
+independently switchable. They are stated multipliers applied to your model, and each
+one lists exactly what it changed. Neither is presented as the right answer; the point
+is to see which assumptions matter.
 
 **What if** — eight levers (churn, pricing, CAC, acquisition volume, signup
 conversion, expansion, gross margin, expenses). Drag one and the whole dashboard shows
 the hypothetical as a ghost value with a delta against your model. Apply it or discard
 it; nothing changes until you say so.
+
+**Reading a chart.** Hover for a card carrying the period, every series value and the
+change since the previous period; click to pin it; click a legend key to hide a series.
+Arrows step, Enter pins, Escape releases.
 
 **Methodology** — every formula, every global assumption and every benchmark range,
 including the ones that differ between SaaS practitioners, stated plainly.
