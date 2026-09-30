@@ -40,6 +40,21 @@ it; nothing changes until you say so.
 change since the previous period; click to pin it; click a legend key to hide a series.
 Arrows step, Enter pins, Escape releases.
 
+## Editing without fear
+
+- **Undo and redo.** Every assumption change is reversible, from the top bar or with
+  `Ctrl/Cmd+Z` and `Ctrl/Cmd+Shift+Z` (or `Ctrl+Y`). A drag coalesces into one step
+  rather than fifty, and re-entering a value you already have adds nothing to the stack.
+- **Per-field reset.** A field that differs from its default shows a restore control,
+  so "what have I changed?" and "put that one back" are both one click. Double-clicking
+  a field label does the same.
+- **Adopt a scenario.** Each scenario panel can replace your assumptions with it —
+  useful when a comparison makes the case for slower churn or a bigger funnel.
+- **`Escape` discards a running what-if** from anywhere, and an active preview keeps its
+  Apply / Discard bar pinned below the header so it is reachable however far you scroll.
+- **Switching tabs starts at the top**, and changing your mind is always cheaper than
+  getting the number right the first time.
+
 **Methodology** — every formula, every global assumption and every benchmark range,
 including the ones that differ between SaaS practitioners, stated plainly.
 

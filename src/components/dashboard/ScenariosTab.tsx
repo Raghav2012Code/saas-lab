@@ -4,11 +4,13 @@ import { LineChart, type LineSeries } from '../charts/LineChart';
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
 import { Icon } from '../ui/Icon';
 import { InlineNote, Panel, SectionHeading } from '../ui/Panel';
+import { Button } from '../ui/Button';
 import { Pill } from '../ui/Pill';
 import { cx } from '../../lib/cx';
 import { monthLabels } from '../../lib/labels';
 import { present } from '../../lib/levers';
 import { useModel } from '../../state/store';
+import { useToast } from '../../state/toast';
 import type { Formatters } from '../../engine/format';
 import type { Model, ScenarioResult } from '../../engine/types';
 import { HorizonControl } from './HorizonControl';
@@ -31,7 +33,8 @@ interface Row {
  * assumptions move the outcome — not to recommend one.
  */
 export function ScenariosTab() {
-  const { scenarios, fmt, horizon, model } = useModel();
+  const { scenarios, fmt, horizon, model, replaceModel } = useModel();
+  const { notify } = useToast();
   const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const seriesToggle = useSeriesToggle();
@@ -268,6 +271,22 @@ export function ScenariosTab() {
               </span>
             }
             description={scenario.description}
+            actions={
+              scenario.changes.length > 0 ? (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    replaceModel(scenario.model);
+                    notify(`Now modelling your ${scenario.label.toLowerCase()} assumptions`);
+                  }}
+                  title="Replace your assumptions with this scenario"
+                >
+                  Use these
+                </Button>
+              ) : (
+                <Pill tone="neutral">current</Pill>
+              )
+            }
           >
             {scenario.changes.length === 0 ? (
               <InlineNote>Your assumptions, unchanged.</InlineNote>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { assumptionsCsv, downloadFile, modelJson, projectionCsv } from '../../engine/export';
+import { assumptionsCsv, copyText, downloadFile, modelJson, projectionCsv } from '../../engine/export';
+import { buildShareUrl } from '../../engine/share';
 import { assumptionRows, buildModelExport } from '../../lib/export-model';
 import { useModel } from '../../state/store';
 import { useToast } from '../../state/toast';
@@ -37,6 +38,19 @@ export function ExportMenu() {
   const stamp = new Date().toISOString().slice(0, 10);
 
   const actions: { id: string; label: string; hint: string; run: () => void }[] = [
+    {
+      id: 'share',
+      label: 'Copy share link',
+      hint: 'Every assumption travels in the link',
+      run: () => {
+        void copyText(buildShareUrl(model)).then((ok) =>
+          notify(
+            ok ? 'Share link copied — the whole model is in the link' : 'Could not copy the link',
+            ok ? 'neutral' : 'error',
+          ),
+        );
+      },
+    },
     {
       id: 'projection',
       label: 'Projection CSV',

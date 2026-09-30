@@ -16,6 +16,8 @@ export type IconName =
   | 'close'
   | 'sliders'
   | 'reset'
+  | 'undo'
+  | 'redo'
   | 'print'
   | 'bars'
   | 'pin'
@@ -86,6 +88,18 @@ const GLYPHS: Record<IconName, ReactNode> = {
     <>
       <path d="M13 8a5 5 0 1 1-1.6-3.7" />
       <path d="M13.2 2.6v3.2H10" />
+    </>
+  ),
+  undo: (
+    <>
+      <path d="M3 7.2h5.4a3.7 3.7 0 0 1 0 7.4H5.2" />
+      <path d="M6.1 4.1 3 7.2l3.1 3.1" />
+    </>
+  ),
+  redo: (
+    <>
+      <path d="M13 7.2H7.6a3.7 3.7 0 0 0 0 7.4h3.2" />
+      <path d="M9.9 4.1 13 7.2l-3.1 3.1" />
     </>
   ),
   print: (

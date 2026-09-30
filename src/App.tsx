@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import { MethodologyTab } from './components/dashboard/MethodologyTab';
 import { OverviewTab } from './components/dashboard/OverviewTab';
 import { ProjectionsTab } from './components/dashboard/ProjectionsTab';
@@ -18,7 +20,7 @@ function Toast() {
     <div
       role="status"
       aria-live="polite"
-      className="no-print pointer-events-none fixed bottom-4 left-1/2 z-50 -translate-x-1/2 lg:bottom-6"
+      className="no-print pointer-events-none fixed bottom-[4.75rem] left-1/2 z-50 -translate-x-1/2 lg:bottom-6"
     >
       <div
         className={`flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-[var(--shadow-overlay)] ${
@@ -34,6 +36,11 @@ function Toast() {
 
 export function App() {
   const { tab } = useModel();
+
+  // A new view starts at the top; without this you land mid-page on the next tab.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [tab]);
 
   return (
     <div id="top" className="min-h-dvh bg-bg">

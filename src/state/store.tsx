@@ -5,11 +5,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 
-import { DEFAULT_HORIZON, DEFAULT_MODEL, STORAGE_KEY } from '../engine/constants';
+import { DEFAULT_HORIZON, DEFAULT_MODEL, FIELD_SPECS, STORAGE_KEY } from '../engine/constants';
 import { createFormatters, type Formatters } from '../engine/format';
 import { derive } from '../engine/metrics';
 import { simulate } from '../engine/model';
@@ -55,6 +56,11 @@ interface StoreValue {
   setField: (key: NumericField, value: number) => void;
   update: (patch: Partial<Model>) => void;
   reset: () => void;
+  replaceModel: (model: Model) => void;
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   setCurrency: (code: CurrencyCode) => void;
   setHorizon: (horizon: HorizonMonths) => void;
   setTab: (tab: TabId) => void;
@@ -65,6 +71,16 @@ interface StoreValue {
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
+
+/** Shallow equality across every field of the model, for history bookkeeping. */
+function sameModel(a: Model, b: Model): boolean {
+  return (
+    a.currency === b.currency &&
+    a.acquisitionMode === b.acquisitionMode &&
+    a.cacMode === b.cacMode &&
+    FIELD_SPECS.every((spec) => a[spec.key] === b[spec.key])
+  );
+}
 
 function consumeSharedHash(): Model | null {
   if (typeof window === 'undefined') return null;
@@ -95,11 +111,55 @@ function readInitialHorizon(): HorizonMonths {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [model, setModel] = useState<Model>(readInitialModel);
+  const [model, setModelState] = useState<Model>(readInitialModel);
   const [levers, setLevers] = useState<LeverValues>(EMPTY_LEVERS);
   const [horizon, setHorizon] = useState<HorizonMonths>(readInitialHorizon);
   const [tab, setTab] = useState<TabId>('overview');
   const [railOpen, setRailOpen] = useState(false);
+
+  /**
+   * Undo history for the assumptions. Dragging a label fires an update per few
+   * pixels, so consecutive changes to the same field inside a short window fold
+   * into one entry — otherwise a single scrub would bury the previous state
+   * under fifty of them.
+   */
+  const [history, setHistory] = useState<{ past: Model[]; future: Model[] }>({ past: [], future: [] });
+  const lastEdit = useRef<{ key: string; at: number }>({ key: '', at: 0 });
+
+  const commit = useCallback(
+    (next: Model, coalesceKey?: string) => {
+      // Committing a value that is already set (re-typing the same number, or a
+      // scrub that lands back where it started) must not create an undo step the
+      // user has to press through.
+      if (sameModel(next, model)) return;
+
+      const now = Date.now();
+      const coalesce =
+        coalesceKey !== undefined && lastEdit.current.key === coalesceKey && now - lastEdit.current.at < 600;
+      lastEdit.current = { key: coalesceKey ?? '', at: now };
+      if (!coalesce) {
+        setHistory((current) => ({ past: [...current.past, model].slice(-50), future: [] }));
+      }
+      setModelState(next);
+    },
+    [model],
+  );
+
+  const undo = useCallback(() => {
+    const previous = history.past[history.past.length - 1];
+    if (!previous) return;
+    lastEdit.current = { key: '', at: 0 };
+    setHistory({ past: history.past.slice(0, -1), future: [...history.future, model] });
+    setModelState(previous);
+  }, [history, model]);
+
+  const redo = useCallback(() => {
+    const next = history.future[history.future.length - 1];
+    if (!next) return;
+    lastEdit.current = { key: '', at: 0 };
+    setHistory({ past: [...history.past, model], future: history.future.slice(0, -1) });
+    setModelState(next);
+  }, [history, model]);
 
   useEffect(() => {
     try {
@@ -114,8 +174,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const onHashChange = () => {
       const shared = consumeSharedHash();
       if (shared) {
-        setModel(shared);
+        setModelState(shared);
         setLevers(EMPTY_LEVERS);
+        setHistory({ past: [], future: [] });
       }
     };
     window.addEventListener('hashchange', onHashChange);
@@ -144,22 +205,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const scenarios = useMemo(() => buildScenarios(model), [model]);
   const warnings = useMemo(() => modelWarnings(model), [model]);
 
-  const update = useCallback((patch: Partial<Model>) => {
-    setModel((current) => normalizeModel({ ...current, ...patch }));
-  }, []);
+  const update = useCallback(
+    (patch: Partial<Model>) => {
+      commit(normalizeModel({ ...model, ...patch }));
+    },
+    [commit, model],
+  );
 
-  const setField = useCallback((key: NumericField, value: number) => {
-    setModel((current) => normalizeModel({ ...current, [key]: value }));
-  }, []);
+  const setField = useCallback(
+    (key: NumericField, value: number) => {
+      commit(normalizeModel({ ...model, [key]: value }), key);
+    },
+    [commit, model],
+  );
 
   const reset = useCallback(() => {
-    setModel({ ...DEFAULT_MODEL });
+    commit({ ...DEFAULT_MODEL });
     setLevers(EMPTY_LEVERS);
-  }, []);
+  }, [commit]);
 
-  const setCurrency = useCallback((code: CurrencyCode) => {
-    setModel((current) => ({ ...current, currency: code }));
-  }, []);
+  const setCurrency = useCallback(
+    (code: CurrencyCode) => {
+      commit({ ...model, currency: code }, 'currency');
+    },
+    [commit, model],
+  );
+
+  const replaceModel = useCallback(
+    (next: Model) => {
+      commit(normalizeModel(next));
+      setLevers(EMPTY_LEVERS);
+    },
+    [commit],
+  );
 
   const setLever = useCallback((id: string, value: number | null) => {
     setLevers((current) => ({ ...current, [id]: value }));
@@ -168,9 +246,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const resetLevers = useCallback(() => setLevers(EMPTY_LEVERS), []);
 
   const applyPreview = useCallback(() => {
-    setModel((current) => normalizeModel(applyLevers(current, levers)));
+    commit(normalizeModel(applyLevers(model, levers)));
     setLevers(EMPTY_LEVERS);
-  }, [levers]);
+  }, [commit, levers, model]);
+
+  const activeCount = active.length;
+
+  /**
+   * Keyboard parity for the two things a pointer gets for free: undo, and
+   * backing out of a what-if. Skipped while typing so the browser's own
+   * field-level undo keeps working inside inputs.
+   */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const editing =
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+      if (event.key === 'Escape') {
+        if (activeCount > 0 && !document.querySelector('dialog[open]')) resetLevers();
+        return;
+      }
+      if (editing) return;
+      if (!(event.metaKey || event.ctrlKey)) return;
+
+      const key = event.key.toLowerCase();
+      if (key === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) redo();
+        else undo();
+      } else if (key === 'y') {
+        event.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeCount, redo, resetLevers, undo]);
 
   const value = useMemo<StoreValue>(
     () => ({
@@ -189,6 +302,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setField,
       update,
       reset,
+      replaceModel,
+      undo,
+      redo,
+      canUndo: history.past.length > 0,
+      canRedo: history.future.length > 0,
       setCurrency,
       setHorizon,
       setTab,
@@ -212,6 +330,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setField,
       update,
       reset,
+      replaceModel,
+      undo,
+      redo,
+      history.past.length,
+      history.future.length,
       setCurrency,
       setLever,
       resetLevers,

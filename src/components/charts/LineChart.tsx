@@ -194,7 +194,7 @@ export function LineChart({
           role="img"
           aria-label={ariaLabel}
           tabIndex={0}
-          className="block max-w-full cursor-crosshair touch-none focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="block max-w-full cursor-crosshair touch-pan-y focus-visible:outline-2 focus-visible:outline-offset-2"
           onPointerMove={(event) => report(indexAt(event.clientX, event.currentTarget))}
           onPointerLeave={() => report(null)}
           onClick={(event) => {

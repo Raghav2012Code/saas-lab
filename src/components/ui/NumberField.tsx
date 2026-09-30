@@ -2,6 +2,7 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 
 import type { Formatters } from '../../engine/format';
 import { clamp, round } from '../../engine/math';
+import { DEFAULT_MODEL } from '../../engine/constants';
 import type { FieldSpec } from '../../engine/types';
 import { fieldWarning, parseNumericInput } from '../../engine/validate';
 import { formatFieldValue } from '../../lib/field-format';
@@ -39,9 +40,11 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
 
   const warning = fieldWarning(spec, value);
   const display = draft ?? rawText(value);
+  const isDefault = value === DEFAULT_MODEL[spec.key];
 
   // Percent fields already carry their unit inside the input, so no echo.
   const echo = spec.unit === 'percent' ? null : formatFieldValue(spec, value, fmt);
+  const rangeShare = spec.max > spec.min ? (value - spec.min) / (spec.max - spec.min) : 0;
 
   const step = (direction: 1 | -1, big: boolean) => {
     const delta = spec.scrub * (big ? 10 : 1) * direction;
@@ -101,19 +104,33 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
           <label
             htmlFor={inputId}
             className="scrub field-label truncate"
-            title="Drag to change, or type a value"
+            title={`Drag to change, or type a value. Double-click to restore the default (${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}).`}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={endScrub}
             onPointerCancel={endScrub}
+            onDoubleClick={() => onCommit(DEFAULT_MODEL[spec.key])}
           >
             {spec.label}
           </label>
+          {/* Answers "which of these have I changed?" and undoes one field at a time. */}
+          {!isDefault ? (
+            <button
+              type="button"
+              onClick={() => onCommit(DEFAULT_MODEL[spec.key])}
+              aria-label={`Reset ${spec.label} to the default, ${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}`}
+              title={`Changed. Reset to ${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}`}
+              className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-brand transition-colors hover:bg-brand-soft"
+            >
+              <Icon name="reset" size={12} />
+            </button>
+          ) : null}
           <InfoTip label={spec.label}>
             <span className="block font-medium text-fg-strong">{spec.hint}</span>
             <span className="mt-1 block text-muted">{spec.detail}</span>
             <span className="mt-1 block text-muted">
-              Drag the label to scrub, or type a value and use the arrow keys.
+              Drag the label to scrub, double-click it to restore the default, or type a value and use the
+              arrow keys.
             </span>
           </InfoTip>
         </div>
@@ -123,6 +140,15 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
           </span>
         ) : null}
       </div>
+
+      {scrubbing ? (
+        <div className="scrub-track" aria-hidden="true">
+          <div
+            className="scrub-fill"
+            style={{ width: `${Math.min(100, Math.max(0, rangeShare * 100))}%` }}
+          />
+        </div>
+      ) : null}
 
       <div className="field-control" data-invalid={error ? 'true' : 'false'}>
         {spec.unit === 'currency' ? <span className="field-affix">{fmt.symbol}</span> : null}

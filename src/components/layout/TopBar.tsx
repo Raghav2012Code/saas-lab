@@ -1,10 +1,7 @@
 import { CURRENCIES, CURRENCY_ORDER } from '../../engine/currency';
-import { copyText } from '../../engine/export';
-import { buildShareUrl } from '../../engine/share';
 import type { CurrencyCode } from '../../engine/types';
 import { useModel } from '../../state/store';
 import { resolveDark, themeLabel, useTheme, type ThemeMode } from '../../state/theme';
-import { useToast } from '../../state/toast';
 import { Segmented } from '../ui/Segmented';
 import { Select } from '../ui/Select';
 import { Button, IconButton } from '../ui/Button';
@@ -43,20 +40,11 @@ function BrandMark() {
 }
 
 export function TopBar() {
-  const { model, setCurrency, tab, setTab } = useModel();
+  const { model, setCurrency, tab, setTab, undo, redo, canUndo, canRedo } = useModel();
   const { mode, cycle } = useTheme();
-  const { notify } = useToast();
 
   const themeIcon = mode === 'light' ? 'sun' : mode === 'dark' ? 'moon' : 'monitor';
   const resolved = resolveDark(mode) ? 'dark' : 'light';
-
-  const share = async () => {
-    const ok = await copyText(buildShareUrl(model));
-    notify(
-      ok ? 'Share link copied — every assumption travels in the link' : 'Could not copy the link',
-      ok ? 'neutral' : 'error',
-    );
-  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg">
@@ -83,6 +71,22 @@ export function TopBar() {
         </div>
 
         <div className="order-2 ml-auto flex items-center gap-1.5 lg:order-3">
+          <div className="flex items-center gap-0.5">
+            <IconButton
+              label="Undo the last change"
+              icon="undo"
+              onClick={undo}
+              disabled={!canUndo}
+              className="disabled:opacity-35 disabled:cursor-not-allowed"
+            />
+            <IconButton
+              label="Redo the change"
+              icon="redo"
+              onClick={redo}
+              disabled={!canRedo}
+              className="disabled:opacity-35 disabled:cursor-not-allowed"
+            />
+          </div>
           <Select<CurrencyCode>
             ariaLabel="Currency"
             value={model.currency}
@@ -97,7 +101,6 @@ export function TopBar() {
             icon={themeIcon}
             onClick={cycle}
           />
-          <IconButton label="Copy a share link to this model" icon="link" onClick={share} />
           <ExportMenu />
         </div>
       </div>

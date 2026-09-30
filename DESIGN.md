@@ -219,6 +219,22 @@ A second pass then found the defect behind "I can't hover over it":
 | The funnel's bar had a `transition-[width]` | removed — data display does not animate layout properties |
 | New funnel drop-off text used `opacity-90` on `--subtle`, landing at 4.45:1 | opacity removed; the token pair passes, and the failure was caught by Lighthouse rather than by the token gate (which sees tokens, not local opacity modifiers) |
 
+A third pass looked for missing affordances rather than defects:
+
+| Finding | Resolution |
+|---|---|
+| **No undo.** Dragging numbers in a model with no way back is the largest gap in a tool like this. | History with `Ctrl/Cmd+Z` / `Shift+Z` and top-bar controls. A drag coalesces by field and time window; re-committing an unchanged value adds nothing, so a step is never phantom. |
+| **No way to restore one field.** Recovering a single default meant remembering it or resetting the whole model. | A restore control appears on any field that differs from its default (the answer to "what have I changed?"), and double-clicking a label does the same. |
+| **Scenarios were read-only.** The obvious next thought after comparing them — "make that mine" — had no action. | "Use these" adopts a scenario, undoable like any other change. |
+| **Charts swallowed the page scroll on touch.** `touch-action: none` on every chart meant a swipe that began on a chart did nothing, and the dashboard is mostly charts. | `touch-pan-y`; vertical scrolling works everywhere and a tap still pins a point. |
+| **The preview bar scrolled away.** Exploring a what-if and then moving to another tab lost sight of Apply / Discard. | Pinned below the header, above the content, at every scroll position. A `--header-h` token keeps the two aligned instead of a magic offset. |
+| **Escape did nothing** outside the drawer, in the one context where it obviously should. | Escape discards a running what-if from anywhere (except while typing, and except when a dialog is open). |
+| **Switching tabs kept the scroll position**, landing you mid-page on the new view. | Tabs start at the top. |
+| **The toast sat behind the mobile action bar** — a copy confirmation was invisible on a phone. | Raised clear of the bar below 1024px. |
+| Share was an unlabelled icon among five others; people look under Export. | "Copy share link" leads the Export menu, freeing a slot in the header. |
+| Nothing showed where a scrub sat within its range. | A thin range track appears under the label while dragging, using the `scrub-track` styles that had been sitting unused. |
+| Dead CSS: `.no-scrollbar`, `.divider-y`, `.sticky-safe` (no remaining users). | Removed. |
+
 Result: Lighthouse **Accessibility 100, Best Practices 100, SEO 100**, zero
 failures, in both themes.
 

@@ -326,10 +326,6 @@
     padding: 0;
   }
 
-  .divider-y > * + * {
-    border-top: 1px solid var(--border);
-  }
-
   /* ---------- buttons ---------- */
 
   .btn {
@@ -899,24 +895,9 @@
   }
 }
 
-@layer utilities {
-  .no-scrollbar {
-    scrollbar-width: none;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 /* ------------------------------------------------------------------ *
  * Global layout helpers
  * ------------------------------------------------------------------ */
-
-@layer utilities {
-  .sticky-safe {
-    top: 0;
-  }
-}
 
 @media print {
   :root {
