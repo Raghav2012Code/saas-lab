@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 interface ToastState {
   id: number;
@@ -10,24 +10,42 @@ interface ToastState {
 interface ToastApi {
   message: string | null;
   tone: ToastState['tone'];
+  /** true while the toast is fading out, so it can animate its exit */
+  closing: boolean;
   notify: (message: string, tone?: ToastState['tone']) => void;
 }
+
+const VISIBLE_MS = 2400;
+const EXIT_MS = 120;
 
 const ToastContext = createContext<ToastApi | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState | null>(null);
-  const timer = useRef<number | null>(null);
+  const [closing, setClosing] = useState(false);
 
   const notify = useCallback((message: string, tone: ToastState['tone'] = 'neutral') => {
-    if (timer.current !== null) window.clearTimeout(timer.current);
+    setClosing(false);
     setToast({ id: Date.now(), message, tone });
-    timer.current = window.setTimeout(() => setToast(null), 2600);
   }, []);
 
+  // Exit animation first, unmount after, so enter and exit are symmetrical.
+  useEffect(() => {
+    if (!toast) return;
+    const closeTimer = window.setTimeout(() => setClosing(true), VISIBLE_MS);
+    const doneTimer = window.setTimeout(() => {
+      setToast(null);
+      setClosing(false);
+    }, VISIBLE_MS + EXIT_MS);
+    return () => {
+      window.clearTimeout(closeTimer);
+      window.clearTimeout(doneTimer);
+    };
+  }, [toast]);
+
   const value = useMemo<ToastApi>(
-    () => ({ message: toast?.message ?? null, tone: toast?.tone ?? 'neutral', notify }),
-    [toast, notify],
+    () => ({ message: toast?.message ?? null, tone: toast?.tone ?? 'neutral', closing, notify }),
+    [toast, closing, notify],
   );
 
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;

@@ -134,7 +134,7 @@ export const MODEL_NOTES: ModelNote[] = [
   },
   {
     id: 'one-model',
-    title: 'One model, not twenty calculators',
+    title: 'Everything comes from one simulation',
     body: 'Every figure on every screen comes from a single monthly simulation of the model you entered. There is no formula in the interface, so nothing can disagree with anything else.',
   },
   {

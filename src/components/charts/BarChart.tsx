@@ -104,8 +104,9 @@ export function BarChart({
         items={
           signColors
             ? [
-                { id: 'positive', label: 'Positive', color: signColors.positive },
-                { id: 'negative', label: 'Negative', color: signColors.negative },
+                // The direction is in the label, so the legend reads in grayscale.
+                { id: 'positive', label: 'Positive (+)', color: signColors.positive },
+                { id: 'negative', label: 'Negative (−)', color: signColors.negative },
               ]
             : series
         }

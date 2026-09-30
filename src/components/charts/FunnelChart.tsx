@@ -42,7 +42,7 @@ export function FunnelChart({ stages, ariaLabel }: { stages: FunnelStage[]; aria
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-surface-2">
                 <div
-                  className="h-full rounded-full transition-[width] duration-300"
+                  className="h-full rounded-full"
                   style={{
                     width: `${share * 100}%`,
                     backgroundColor: `var(--series-${Math.min(index + 1, 4)})`,

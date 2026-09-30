@@ -104,7 +104,7 @@ export function ExportMenu() {
         <div
           role="menu"
           aria-label="Export"
-          className="panel absolute right-0 z-50 mt-1.5 w-[17rem] overflow-hidden p-1 shadow-[var(--shadow-overlay)]"
+          className="panel menu-in absolute right-0 z-50 mt-1.5 w-[17rem] overflow-hidden p-1 shadow-[var(--shadow-overlay)]"
         >
           {actions.map((action) => (
             <button

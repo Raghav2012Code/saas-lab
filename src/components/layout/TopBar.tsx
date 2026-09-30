@@ -63,8 +63,8 @@ export function TopBar() {
       <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 lg:px-5">
         <a
           href="#top"
-          className="order-1 flex items-center gap-2 rounded-sm"
-          aria-label="SaaS Calculator, back to top"
+          className="order-1 flex min-h-8 items-center gap-2 rounded-sm py-1"
+          title="Back to top"
         >
           <BrandMark />
           <span className="text-base font-semibold tracking-tight text-fg-strong">
@@ -73,9 +73,13 @@ export function TopBar() {
         </a>
 
         <div className="order-3 w-full min-w-0 lg:order-2 lg:w-auto">
-          <div className="no-scrollbar -mx-1 overflow-x-auto px-1">
-            <Segmented value={tab} onChange={setTab} options={TABS} label="View" />
-          </div>
+          <Segmented
+            className="-mx-1 px-1"
+            value={tab}
+            onChange={setTab}
+            options={TABS}
+            label="View"
+          />
         </div>
 
         <div className="order-2 ml-auto flex items-center gap-1.5 lg:order-3">

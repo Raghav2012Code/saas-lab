@@ -12,6 +12,8 @@ interface SegmentedProps<T extends string> {
   options: SegmentedOption<T>[];
   label: string;
   className?: string;
+  /** stretch to the container width, sharing it evenly between options */
+  fill?: boolean;
 }
 
 /**
@@ -24,16 +26,17 @@ export function Segmented<T extends string>({
   options,
   label,
   className,
+  fill,
 }: SegmentedProps<T>) {
   return (
-    <div role="group" aria-label={label} className={cx('seg', className)}>
+    <div role="group" aria-label={label} className={cx('seg', fill && 'flex w-full', className)}>
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
           aria-pressed={option.value === value}
           title={option.title}
-          className="seg-item"
+          className={cx('seg-item', fill && 'flex-1')}
           onClick={() => onChange(option.value)}
         >
           {option.label}

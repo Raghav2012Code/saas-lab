@@ -137,7 +137,7 @@ export function ScenariosTab() {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
       <SectionHeading
-        eyebrow="Scenarios"
+
         title="How the same model behaves under different assumptions"
         description="Conservative and aggressive are stated multipliers, not a second model. Neither is a recommendation — the point is to see which assumptions actually move the outcome."
         actions={<HorizonControl />}

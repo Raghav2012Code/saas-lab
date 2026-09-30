@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { FIELD_GROUPS } from '../../engine/constants';
 import type { AcquisitionMode, CacMode } from '../../engine/types';
 import { visibleFields } from '../../engine/validate';
@@ -22,9 +24,17 @@ const CAC_OPTIONS: { value: CacMode; label: string; title: string }[] = [
  * The control surface. Every input lives here, grouped the way a founder thinks
  * about the business, and every change recalculates the whole model instantly.
  */
-export function AssumptionRail() {
+export function AssumptionRail({
+  variant = 'rail',
+  closeSlot,
+}: {
+  variant?: 'rail' | 'drawer';
+  /** rendered in the header, so the drawer can offer a close control */
+  closeSlot?: ReactNode;
+}) {
   const { model, fmt, setField, update, reset, isDefault, warnings } = useModel();
   const fields = visibleFields(model);
+  const idPrefix = variant === 'drawer' ? 'drawer-field' : 'rail-field';
 
   const groups = FIELD_GROUPS.map((group) => ({
     group,
@@ -40,17 +50,20 @@ export function AssumptionRail() {
           <h2 className="label-xs">Your assumptions</h2>
           <p className="mt-0.5 text-xs text-muted">Change anything and the whole model follows.</p>
         </div>
-        <InfoTip label="Assumptions">
-          <span className="block font-medium text-fg-strong">Drag a label to scrub, or type a value</span>
-          <span className="mt-1 block text-muted">
-            Labels are drag handles: pull left or right to change a number, arrow keys work too. Shift makes
-            it finer.
-          </span>
-        </InfoTip>
+        <div className="flex shrink-0 items-center gap-1">
+          <InfoTip label="Assumptions">
+            <span className="block font-medium text-fg-strong">Drag a label to scrub, or type a value</span>
+            <span className="mt-1 block text-muted">
+              Labels are drag handles: pull left or right to change a number. Arrow keys step a focused
+              input, and Shift makes each step finer.
+            </span>
+          </InfoTip>
+          {closeSlot}
+        </div>
       </header>
 
-      <div className="flex flex-col gap-3 border-b border-line px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col gap-4 border-b border-line px-4 py-3">
+        <div className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1 text-xs font-medium text-muted">
             New customers from
             <InfoTip label="New customers from">
@@ -59,13 +72,14 @@ export function AssumptionRail() {
             </InfoTip>
           </span>
           <Segmented
+            fill
             label="How new customers are determined"
             value={model.acquisitionMode}
             onChange={(value) => update({ acquisitionMode: value })}
             options={ACQUISITION_OPTIONS}
           />
         </div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1 text-xs font-medium text-muted">
             CAC from
             <InfoTip label="CAC from">
@@ -74,6 +88,7 @@ export function AssumptionRail() {
             </InfoTip>
           </span>
           <Segmented
+            fill
             label="How CAC is determined"
             value={model.cacMode}
             onChange={(value) => update({ cacMode: value })}
@@ -101,6 +116,7 @@ export function AssumptionRail() {
                 value={model[spec.key]}
                 fmt={fmt}
                 onCommit={(value) => setField(spec.key, value)}
+                idPrefix={idPrefix}
               />
             ))}
           </section>
@@ -108,14 +124,8 @@ export function AssumptionRail() {
       </div>
 
       <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
-        <p className="text-xs text-muted">Saved in this browser</p>
-        <Button
-          size="sm"
-          variant="quiet"
-          onClick={reset}
-          disabled={isDefault}
-          title={isDefault ? 'Already using the defaults' : 'Reset every assumption'}
-        >
+        <p className="text-xs text-muted">{isDefault ? 'Using the defaults' : 'Saved in this browser'}</p>
+        <Button size="sm" variant="quiet" onClick={reset} title="Reset every assumption to its default">
           Reset
         </Button>
       </footer>

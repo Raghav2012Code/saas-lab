@@ -51,7 +51,7 @@ export function Slider({
             <button
               type="button"
               onClick={onReset}
-              className="text-subtle transition-colors hover:text-fg"
+              className="inline-flex h-6 w-6 items-center justify-center text-subtle transition-colors hover:text-fg"
               aria-label={`Reset ${label} to ${baselineDisplay}`}
               title={`Reset to ${baselineDisplay}`}
             >
@@ -61,9 +61,9 @@ export function Slider({
         </span>
       </div>
 
-      <div className="relative flex h-4 items-center">
+      <div className="relative flex h-8 items-center">
         <span
-          className="pointer-events-none absolute left-0 top-1/2 h-3 w-px -translate-y-1/2 bg-line-strong"
+          className="pointer-events-none absolute top-1/2 h-3 w-px -translate-y-1/2 bg-line-strong"
           style={{ left: `calc(${Math.min(Math.max(notch, 0), 100)}% - 0.5px)` }}
           aria-hidden="true"
         />

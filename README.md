@@ -78,6 +78,10 @@ src/components/ ui primitives, hand-built SVG charts, layout, dashboard panels
 - **Export**: projection CSV, assumptions CSV, model JSON, print/PDF.
 - **Currency**: USD, EUR, GBP, INR, formatted through `Intl` throughout — including
   compact forms such as `₹1.2 Cr` on chart axes.
+- **Responsive by redesign, not by shrinking**: below 1024px the assumptions rail
+  becomes a modal drawer with a close button and backdrop dismissal, the tab
+  group wraps rather than hiding a tab, and the dashboard reflows to two-column
+  metric tiles.
 - **Deliberately out of scope**: taxes, financing, multi-year contracts, prepaid
   annual plans, plan-level seat mix, and hiring ladders. Each would add inputs
   without changing the shape of the answer.
@@ -88,8 +92,14 @@ src/components/ ui primitives, hand-built SVG charts, layout, dashboard panels
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint
 npm test            # vitest run
+npm run contrast    # WCAG AA contrast gate for every token pair, both themes
 npm run build       # typecheck + production build
 npm run check       # all of the above
 ```
 
-`DESIGN.md` records the visual system and the reasoning behind it.
+Lighthouse reports **Accessibility 100, Best Practices 100, SEO 100**, with no
+console errors. Every interactive target is at least 24px, the heading outline is
+h1 → h2 → h3, and both themes pass the contrast gate.
+
+`DESIGN.md` records the visual system, the reasoning behind it, and the full
+audit trail of what was found and fixed.

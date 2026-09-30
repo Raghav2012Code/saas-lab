@@ -15,20 +15,10 @@ export function InfoTip({ label, children }: InfoTipProps) {
       <button
         type="button"
         aria-label={`Explain: ${label}`}
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-subtle opacity-70 transition-opacity hover:opacity-100 hover:text-fg"
+        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-subtle opacity-80 transition-opacity hover:opacity-100 hover:text-fg"
       >
         <Icon name="info" size={13} />
       </button>
     </Tooltip>
-  );
-}
-
-/** A definition row used inside tips and the methodology table. */
-export function TipRow({ term, children }: { term: string; children: ReactNode }) {
-  return (
-    <div className="flex gap-1.5">
-      <span className="text-subtle">{term}</span>
-      <span className="text-fg">{children}</span>
-    </div>
   );
 }

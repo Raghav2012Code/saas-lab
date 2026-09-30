@@ -11,7 +11,7 @@ import { useModel } from './state/store';
 import { useToast } from './state/toast';
 
 function Toast() {
-  const { message, tone } = useToast();
+  const { message, tone, closing } = useToast();
   if (!message) return null;
 
   return (
@@ -20,7 +20,11 @@ function Toast() {
       aria-live="polite"
       className="no-print pointer-events-none fixed bottom-4 left-1/2 z-50 -translate-x-1/2 lg:bottom-6"
     >
-      <div className="fade-in flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-[var(--shadow-overlay)]">
+      <div
+        className={`flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-[var(--shadow-overlay)] ${
+          closing ? 'fade-out' : 'fade-in'
+        }`}
+      >
         <Icon name={tone === 'error' ? 'warning' : 'check'} size={14} className={tone === 'error' ? 'text-danger' : 'text-success'} />
         {message}
       </div>
@@ -33,11 +37,12 @@ export function App() {
 
   return (
     <div id="top" className="min-h-dvh bg-bg">
+      <h1 className="sr-only">SaaS Calculator</h1>
       <TopBar />
       <PreviewBanner />
 
       <div className="mx-auto flex w-full max-w-[1500px] items-start">
-        <aside className="sticky top-[56px] hidden h-[calc(100dvh-56px)] w-[336px] shrink-0 overflow-hidden border-r border-line lg:block">
+        <aside className="sticky top-[var(--header-h)] hidden h-[calc(100dvh-var(--header-h))] w-[336px] shrink-0 overflow-hidden border-r border-line lg:block">
           <AssumptionRail />
         </aside>
 

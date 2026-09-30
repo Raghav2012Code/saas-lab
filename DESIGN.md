@@ -50,7 +50,19 @@ never set in mono.
 Scale: **ratio 1.2 on a 15px base**, with an 11px floor for meta text, because
 small labels need a size that survives the ratio.
 
-`11 · 12.5 · 15 · 18 · 21.6 · 25.9 · 31.2 · 37.3 · 44.8px`
+`11 · 12.5 · 14 · 15 · 18 · 21.6 · 25.9 · 31.2 · 37.3 · 44.8px`
+
+Two floors are enforced, not decorative:
+
+- **14px** is the minimum for body copy and for anything interactive (buttons,
+  segmented controls, field labels, panel descriptions, table cells). It was
+  12.5px, which audited as too small for control text.
+- **11px** is the absolute floor, used only for short uppercase labels and
+  dense supporting text (metric labels, pills, chart readouts, tooltips). Chart
+  axis labels were raised from 10px to 11px to respect it.
+
+Hero figures step down responsively (`text-lg → xl → 2xl → 3xl`) so a large
+number can never outgrow its tile at 320px.
 
 Tracking: `-0.014em` on headings, `-0.02em` on figures, `+0.045em` uppercase on
 micro-labels.
@@ -65,10 +77,26 @@ where it carries meaning (approximately 60 / 30 / 10).
 | `bg` | `oklch(0.977 0.003 250)` | `oklch(0.168 0.008 250)` |
 | `surface` | `oklch(0.996 0.001 250)` | `oklch(0.208 0.009 250)` |
 | `fg` / `fg-strong` | `0.235` / `0.155` L | `0.925` / `0.982` L |
+| `muted` (labels, descriptions) | `oklch(0.505 0.013 252)` | `oklch(0.705 0.011 250)` |
+| `subtle` (captions, metric labels) | `oklch(0.53 0.011 252)` | `oklch(0.635 0.012 250)` |
+| `border-strong` (control boundaries) | `oklch(0.63 0.008 252)` | `oklch(0.52 0.013 250)` |
 | `brand` (petrol) | `oklch(0.42 0.072 197)` | `oklch(0.705 0.088 197)` |
 | `accent` (provisional) | `oklch(0.63 0.144 62)` | `oklch(0.775 0.128 62)` |
 | `success` | `oklch(0.5 0.11 158)` | `oklch(0.735 0.115 158)` |
 | `danger` | `oklch(0.53 0.19 26)` | `oklch(0.69 0.155 26)` |
+
+Two values are set by the contrast gate rather than by eye:
+
+- **`subtle`** carries 11px captions, so it must clear 4.5:1 against the *lightest
+  surface it sits on* (`surface-2`, used by table headers), not just against
+  white. That forces it close to `muted` in value, which is why the two read as
+  siblings rather than as a strong hierarchy step.
+- **`border-strong`** draws component boundaries (inputs, buttons, tooltips) and
+  therefore clears 3:1 per WCAG 1.4.11. `border` stays a hairline: it only draws
+  separators and grid lines, which are decorative and exempt.
+
+`npm run contrast` asserts all 46 foreground/background pairs in both themes and
+fails the build if any drops below its threshold.
 
 Petrol is deliberately outside the indigo/violet band that AI-generated UI
 defaults to, and reads as financial and instrument-like rather than corporate
@@ -92,9 +120,11 @@ text, every advisory carries a distinct icon, every benchmark carries a word.
 - **Elevation**: defined edges (1px hairlines) everywhere. A shadow exists only
   for overlays (`--shadow-overlay`), never stacked on a bordered element.
 - **Motion**: `120ms / 180ms / 300ms`, single ease `cubic-bezier(0.22,1,0.36,1)`,
-  transform and opacity only, all durations zeroed under
-  `prefers-reduced-motion`. Figures are **not** tweened: an animated number in a
-  financial tool is a lie in progress.
+  transform and opacity only. Reduced motion does not zero every duration; it
+  sets the displacement tokens (`--shift`, `--shift-lg`) to `0`, so overlays
+  fade instead of sliding. Figures are **not** tweened: an animated number in a
+  financial tool is a lie in progress. Nothing animates width, height or
+  position.
 - **Implementing layer**: Tailwind v4 `@theme inline` mapping runtime CSS
   variables, so `.dark` swaps values without a second set of utilities.
 
@@ -119,9 +149,54 @@ text, every advisory carries a distinct icon, every benchmark carries a word.
   answer shows an em dash, a "Not applicable" pill and the reason why — never
   `Infinity`, never a fabricated zero.
 - **Accessibility.** WCAG 2.2 AA contrast in both modes, visible focus rings on
-  every interactive element, 32px controls, native form controls for select and
-  range, `aria-live` readouts on charts, real `<caption>`s on tables, and a
+  every interactive element, no interactive target below 24px, native form
+  controls for select and range, `aria-live` readouts on charts, real
+  `<caption>`s on tables, one `<h1>` with an unbroken h1→h2→h3 outline, and a
   print stylesheet that unwinds every scroll container.
+
+## Audit
+
+A full UI/UX pass was run against this build: Lighthouse, an automated contrast
+gate, and scripted checks of the rendered page (target sizes, heading outline,
+focus occlusion, overflow at 320/360/390/768/1024/1440, both themes). Findings
+and their resolutions:
+
+| Finding | Resolution |
+|---|---|
+| `subtle` captions at 3.13:1 (light) / 4.24:1 (dark) — ~29 nodes | token retuned to 5.2:1 / 4.7:1 worst-case |
+| Table headers on `surface-2` below 4.5:1 | header text moved to `muted` |
+| Input boundaries at 1.70:1 / 1.82:1 (WCAG 1.4.11) | `border-strong` retuned to 3.27:1 / 3.23:1 |
+| Brand link's accessible name didn't match its visible text | dropped `aria-label`, visible text is the name |
+| 61 interactive targets under 24px | label handles, info buttons, range inputs and slider resets enlarged to ≥24px |
+| Focused elements could land under the sticky header (2.4.11) | `scroll-margin-top` on focusable and anchor targets |
+| Field errors not associated with their input | unique ids + `aria-describedby` + `role="alert"` |
+| Duplicate ids and doubled label associations (rail rendered twice) | namespaced `idPrefix` per variant; drawer content mounts only while open |
+| **Mobile drawer could not be closed by touch** — no close button, backdrop didn't dismiss | close button, backdrop dismissal, explicit Escape handling, and state kept authoritative so it can always reopen |
+| Buttons and segmented controls at 11–12.5px | 14px floor for controls and body copy |
+| Duplicated eyebrow label above each tab heading | eyebrow removed where it repeated the tab name |
+| No `<h1>`; panels and sections both `<h2>` | one `sr-only` `<h1>`, sections `h2`, panels `h3` |
+| `border-radius` set on `:focus-visible`, changing element shape on focus | removed |
+| Tooltip animated on every hover/focus | animation removed (high-frequency interaction) |
+| Reduced motion blanket-zeroed all durations | displacement tokens zeroed, fades kept |
+| Toast had an enter animation and no exit | symmetric exit added |
+| Export menu appeared with no motion | scales from its trigger (`transform-origin: top right`) |
+| Tab strip hid its last tab below ~430px | tab group wraps to a second line |
+| Hero figure could outgrow its tile at 320px | responsive value sizes |
+| Dead `EmptyState` component; disabled button carrying a tooltip | removed; Reset is always enabled |
+
+Result: Lighthouse **Accessibility 100, Best Practices 100, SEO 100**, zero
+failures, in both themes.
+
+Two deviations are deliberate and recorded rather than accidental:
+
+- **Focus rings use `outline`, not `box-shadow`.** The checklist prefers
+  box-shadow so the ring follows `border-radius`; modern browsers round outlines
+  too, and an outline cannot be clipped by a parent's `overflow`. It meets
+  2.4.13's actual requirement: 2px thick at 5.2:1 (light) / 7.45:1 (dark).
+- **Decorative rules stay hairlines.** `--border` (panel separators, table row
+  rules, chart gridlines) sits below 3:1 by design. WCAG 1.4.11 applies to
+  information required to identify a component or state, which is
+  `--border-strong`'s job; separators carry no state.
 
 ## Slop audit
 

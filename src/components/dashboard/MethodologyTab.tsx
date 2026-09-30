@@ -13,7 +13,7 @@ export function MethodologyTab() {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
       <SectionHeading
-        eyebrow="Methodology"
+
         title="Exactly how every number is calculated"
         description="SaaS metrics have more than one accepted definition. These are the ones this model uses, stated plainly so you can judge them."
       />

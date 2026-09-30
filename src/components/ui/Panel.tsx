@@ -24,7 +24,7 @@ export function Panel({ title, description, actions, flush, className, bodyClass
       {hasHead ? (
         <header className="panel-head">
           <div className="min-w-0">
-            {title ? <h2 className="text-base font-semibold text-fg-strong">{title}</h2> : null}
+            {title ? <h3 className="text-base font-semibold text-fg-strong">{title}</h3> : null}
             {description ? <p className="mt-0.5 max-w-prose text-sm text-muted">{description}</p> : null}
           </div>
           {actions ? <div className="flex shrink-0 items-center gap-1.5">{actions}</div> : null}
@@ -53,7 +53,7 @@ export function SectionHeading({
     <div className={cx('flex flex-wrap items-end justify-between gap-x-4 gap-y-2', className)}>
       <div className="min-w-0">
         {eyebrow ? <p className="label-xs">{eyebrow}</p> : null}
-        <h2 className="font-semibold text-fg-strong">{title}</h2>
+        <h2 className="text-lg font-semibold text-fg-strong">{title}</h2>
         {description ? <p className="mt-1 max-w-prose text-sm text-muted">{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-1.5">{actions}</div> : null}
@@ -98,29 +98,6 @@ export function StatRow({
         <span className={cx('num text-base', strong && 'font-medium', toneClass)}>{value}</span>
         {note ? <span className="text-xs text-subtle">{note}</span> : null}
       </span>
-    </div>
-  );
-}
-
-export function EmptyState({
-  icon = 'bars',
-  title,
-  description,
-  action,
-}: {
-  icon?: IconName;
-  title: string;
-  description?: ReactNode;
-  action?: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-subtle">
-        <Icon name={icon} size={17} />
-      </span>
-      <p className="text-base font-medium text-fg-strong">{title}</p>
-      {description ? <p className="max-w-sm text-sm text-muted">{description}</p> : null}
-      {action}
     </div>
   );
 }

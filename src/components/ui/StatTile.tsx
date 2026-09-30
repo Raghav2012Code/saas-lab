@@ -64,6 +64,11 @@ export function StatTile({
 
   const benchLabel = benchmark ? BENCH_LABEL[benchmark.status] : null;
   const hasMeta = Boolean(reason || previewing || word || (!delta && caption) || benchLabel || (delta && !reason));
+  // Steps down at the narrowest widths so a hero figure can never outgrow its tile.
+  const valueSize =
+    size === 'lg'
+      ? 'text-lg min-[380px]:text-xl sm:text-2xl lg:text-3xl'
+      : 'text-base min-[380px]:text-lg sm:text-xl';
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5 py-4">
@@ -79,12 +84,12 @@ export function StatTile({
         className="group flex items-baseline gap-1.5 text-left"
       >
         {word && !previewing ? (
-          <span className="text-xl font-medium text-success">{word}</span>
+          <span className={cx('font-medium text-success', valueSize)}>{word}</span>
         ) : (
           <span
             className={cx(
               'num font-medium',
-              size === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl',
+              valueSize,
               reason ? 'text-subtle' : previewing ? 'ghost-value' : 'text-fg-strong',
             )}
           >
@@ -112,20 +117,20 @@ export function StatTile({
         ) : null}
 
         {!reason && previewing && previewDelta ? (
-          <span className="flex items-center gap-1.5 text-xs text-muted">
+          <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
             <DeltaPill value={previewDelta.value} text={previewDelta.text} higherIsBetter={previewDelta.higherIsBetter ?? true} />
             <span>vs your model</span>
           </span>
         ) : null}
 
         {!reason && !previewing && delta ? (
-          <span className="flex items-center gap-1.5 text-xs text-muted">
+          <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
             <DeltaPill
               value={delta.value}
               text={delta.text}
               higherIsBetter={delta.higherIsBetter ?? true}
             />
-            {caption ? <span className="truncate">{caption}</span> : null}
+            {caption ? <span>{caption}</span> : null}
           </span>
         ) : null}
 

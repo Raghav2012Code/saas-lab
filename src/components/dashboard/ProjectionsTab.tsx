@@ -53,7 +53,7 @@ export function ProjectionsTab() {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
       <SectionHeading
-        eyebrow="Projections"
+
         title={`The next ${horizon} months`}
         description="Straight-line compounding of the assumptions you entered. No smoothing, no best case."
         actions={<HorizonControl />}
