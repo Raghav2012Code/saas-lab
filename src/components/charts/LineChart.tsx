@@ -80,7 +80,7 @@ export function LineChart({
   const [hovered, setHovered] = useState<number | null>(null);
   const [pinned, setPinned] = useState<number | null>(null);
 
-  const chartWidth = Math.max(width, 260);
+  const chartWidth = width > 0 ? width : 320;
   const count = labels.length;
   // Hovering always wins, so a pinned point never blocks exploring; the pin
   // reappears as soon as the pointer leaves.
@@ -186,7 +186,7 @@ export function LineChart({
         <ChartHint pinned={showingPin} />
       </div>
 
-      <div ref={container} className="relative">
+      <div ref={container} className="relative min-w-0">
         <svg
           width={chartWidth}
           height={height}
@@ -221,7 +221,7 @@ export function LineChart({
             emphasis={includeZero ? 0 : null}
           />
 
-          {visible.map((item) => {
+          {visible.map((item, seriesIndex) => {
             const points = item.values.flatMap((value, index) =>
               value === null || !Number.isFinite(value) ? [] : [[x(index), y(value)] as [number, number]],
             );
@@ -232,6 +232,7 @@ export function LineChart({
                   <path d={areaPath(points, geometry.zeroY)} fill={item.color} opacity={0.1} />
                 ) : null}
                 <path
+                  className={seriesIndex > 0 ? `chart-line-${seriesIndex + 1}` : undefined}
                   d={linePath(points)}
                   fill="none"
                   stroke={item.color}

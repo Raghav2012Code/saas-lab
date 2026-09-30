@@ -235,6 +235,20 @@ A third pass looked for missing affordances rather than defects:
 | Nothing showed where a scrub sat within its range. | A thin range track appears under the label while dragging, using the `scrub-track` styles that had been sitting unused. |
 | Dead CSS: `.no-scrollbar`, `.divider-y`, `.sticky-safe` (no remaining users). | Removed. |
 
+A fourth pass rendered the app at true device viewports — 320, 360, 390, 414, 480, 640, 768, 820, 844×390 landscape, 1024, 1180, 1280, 1366, 1440, 1600, 1920 and 2560 — by iframing the app, because media queries resolve against an iframe's own width and a headless browser window cannot go below roughly 500px on this platform.
+
+| Finding | Resolution |
+|---|---|
+| **Horizontal page overflow at 320px** (72px of it). A chart `<svg>` carries an explicit pixel `width` attribute, which feeds its panel's **min-content**; the panel then refused to shrink below it, so the grid, the main column and the page all overflowed — a feedback loop, since the width came from measuring the container it was inflating. | `.panel { min-width: 0 }`, `min-w-0` on the chart wrappers, and the width floor removed from all three charts. Every width now reports zero overflow, and each SVG renders 1:1 with its container instead of being scaled. |
+| **`--header-h` was a hard-coded 57px while the header is 97–169px on phones.** The what-if bar stuck *underneath* the header, and `scroll-margin-top` was too small, so a focused element could land behind it (2.4.11). | Heights are measured at runtime (plus on resize, orientation change, `load` and `fonts.ready`) and published as `--header-h` / `--bottom-bar-h`. Verified equal to reality at every width. |
+| **No safe-area handling** despite `viewport-fit=cover`: on a notched phone the header sat under the status bar, the action bar under the home indicator, and the drawer under the notch. | `env(safe-area-inset-*)` padding on the header, the action bar, the drawer and the main column, including the landscape left/right insets. |
+| **Tables' KPI tiles were unreadable two-up at 320px** — the meta row overflowed its 103px column. | One column below 360px, two from 360px, four from 1024px. |
+| **The phone header wrapped to four rows** because the wordmark plus five controls plus the tab group did not fit. | The wordmark gives way to the brand mark below 640px (the mark carries the brand; the name stays in the document title and the `sr-only` h1), and the action row and currency select tighten slightly below 640px. Four rows became three at 320px, three became two at 360–414px. |
+| **iOS zooms the page when a sub-16px input takes focus.** | Fields and the currency select are 16px below 640px. |
+| **The action bar truncated mid-word** ("420 cu…") at 320–390px. | The customer count moved to the label row, which has spare width, and is dropped below 380px rather than clipped. |
+| **Tile copy buttons were 23.2px tall** at the smallest type step, 0.8px under the target minimum. | `min-h-6`. |
+| Charts would be hue-indistinguishable in forced-colors mode. | Series 2 and 3 take dash patterns under `forced-colors: active`, so the comparison survives without colour. |
+
 Result: Lighthouse **Accessibility 100, Best Practices 100, SEO 100**, zero
 failures, in both themes.
 

@@ -21,9 +21,11 @@
 :root {
   color-scheme: light;
 
-  /* The sticky header's height. The assumptions rail sticks directly beneath it,
-     so the two must agree; this is the single place that number lives. */
+  /* Measured at runtime by useLayoutMetrics: the sticky header wraps to two or
+     three rows on a narrow phone, and the action bar grows with the safe-area
+     inset. These are fallbacks for the first paint. */
   --header-h: 57px;
+  --bottom-bar-h: 0px;
 
   /* surfaces — cool graphite, never cream */
   --bg: oklch(0.977 0.003 250);
@@ -249,10 +251,10 @@
   }
 
   /* WCAG 2.4.11: a focused element scrolled into view must not land under the
-     sticky header. */
+     sticky header, whose height is measured at runtime. */
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
   :where([id]) {
-    scroll-margin-top: 4.5rem;
+    scroll-margin-top: calc(var(--header-h, 3.5rem) + 1rem);
   }
 
   /* Native number spinners fight the scrubbable value inputs. */
@@ -306,6 +308,10 @@
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
+    /* Charts set an explicit pixel width on their <svg>, which contributes to
+       min-content. Without this, a panel refuses to shrink below that width and
+       the whole page overflows on a narrow screen. */
+    min-width: 0;
   }
 
   .panel-head {
@@ -606,6 +612,15 @@
     border: 1px dashed color-mix(in oklab, var(--accent) 55%, transparent);
   }
 
+  /* iOS Safari zooms the whole page when an input smaller than 16px takes
+     focus. A 16px field on phones costs a little density and removes that. */
+  @media (max-width: 639px) {
+    .field-input,
+    .field-control select {
+      font-size: 1rem;
+    }
+  }
+
   /* ---------- tables ---------- */
 
   .data-table {
@@ -805,6 +820,22 @@
     border-color: var(--accent);
   }
 
+  /* High-contrast mode: hue is gone, so series must differ by shape instead.
+     The first series keeps a solid stroke; later ones take a dash pattern. */
+  @media (forced-colors: active) {
+    .chart-line-2 {
+      stroke-dasharray: 6 3;
+    }
+    .chart-line-3 {
+      stroke-dasharray: 2 2;
+    }
+    .chart-band {
+      stroke: CanvasText;
+      stroke-width: 1;
+      stroke-dasharray: 2 2;
+    }
+  }
+
   /* ---------- range input (what-if levers) ---------- */
 
   .range {
@@ -881,6 +912,10 @@
     background-color: var(--surface);
     color: var(--fg);
     animation: rail-in var(--dur) var(--ease);
+    /* Clear the notch and the home indicator on a notched phone. */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .rail-dialog::backdrop {

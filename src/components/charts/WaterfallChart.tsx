@@ -42,7 +42,7 @@ export function WaterfallChart({
   const [hovered, setHovered] = useState<number | null>(null);
   const [pinned, setPinned] = useState<number | null>(null);
 
-  const chartWidth = Math.max(width, 260);
+  const chartWidth = width > 0 ? width : 320;
   const active = hovered ?? pinned;
   const showingPin = pinned !== null && hovered === null;
 
@@ -130,7 +130,7 @@ export function WaterfallChart({
         <ChartHint pinned={showingPin} subject="bar" />
       </div>
 
-      <div ref={container} className="relative">
+      <div ref={container} className="relative min-w-0">
         <svg
           width={chartWidth}
           height={height}

@@ -4,7 +4,9 @@ import type { ReactNode } from 'react';
 export function TileGrid({ children }: { children: ReactNode }) {
   return (
     <div className="panel overflow-hidden">
-      <div className="grid grid-cols-2 gap-px bg-line lg:grid-cols-4">{children}</div>
+      <div className="grid grid-cols-1 gap-px bg-line min-[360px]:grid-cols-2 lg:grid-cols-4">
+        {children}
+      </div>
     </div>
   );
 }

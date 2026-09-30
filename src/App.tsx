@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { useLayoutMetrics } from './hooks/useLayoutMetrics';
+
 import { MethodologyTab } from './components/dashboard/MethodologyTab';
 import { OverviewTab } from './components/dashboard/OverviewTab';
 import { ProjectionsTab } from './components/dashboard/ProjectionsTab';
@@ -20,7 +22,8 @@ function Toast() {
     <div
       role="status"
       aria-live="polite"
-      className="no-print pointer-events-none fixed bottom-[4.75rem] left-1/2 z-50 -translate-x-1/2 lg:bottom-6"
+      className="no-print pointer-events-none fixed left-1/2 z-50 -translate-x-1/2"
+      style={{ bottom: 'calc(var(--bottom-bar-h, 0px) + 1.25rem)' }}
     >
       <div
         className={`flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-[var(--shadow-overlay)] ${
@@ -42,6 +45,10 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [tab]);
 
+  // The sticky header and the mobile action bar are content-sized, so anything
+  // that has to clear them reads their measured heights instead of a guess.
+  useLayoutMetrics();
+
   return (
     <div id="top" className="min-h-dvh bg-bg">
       <h1 className="sr-only">SaaS Calculator</h1>
@@ -53,7 +60,14 @@ export function App() {
           <AssumptionRail />
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-24 pt-6 lg:px-6 lg:pb-16 lg:pt-8">
+        <main
+          className="min-w-0 flex-1 px-4 pt-6 lg:px-6 lg:pb-16 lg:pt-8"
+          style={{
+            paddingBottom: 'calc(var(--bottom-bar-h, 0px) + 2.5rem)',
+            paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+          }}
+        >
           {tab === 'overview' ? <OverviewTab /> : null}
           {tab === 'projections' ? <ProjectionsTab /> : null}
           {tab === 'scenarios' ? <ScenariosTab /> : null}

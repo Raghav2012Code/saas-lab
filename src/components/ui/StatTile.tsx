@@ -81,7 +81,7 @@ export function StatTile({
         type="button"
         onClick={onCopy}
         aria-label={`Copy ${label}: ${(previewing ? previewDisplay : display) ?? display}`}
-        className="group flex items-baseline gap-1.5 text-left"
+        className="group flex min-h-6 items-baseline gap-1.5 text-left"
       >
         {word && !previewing ? (
           <span className={cx('font-medium text-success', valueSize)}>{word}</span>

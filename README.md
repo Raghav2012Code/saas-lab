@@ -102,8 +102,11 @@ src/components/ ui primitives, hand-built SVG charts, layout, dashboard panels
   compact forms such as `₹1.2 Cr` on chart axes.
 - **Responsive by redesign, not by shrinking**: below 1024px the assumptions rail
   becomes a modal drawer with a close button and backdrop dismissal, the tab
-  group wraps rather than hiding a tab, and the dashboard reflows to two-column
-  metric tiles.
+  group wraps rather than hiding a tab, the KPI grid steps 4 → 2 → 1 column, and
+  the header drops its wordmark so the controls keep one row. Verified with zero
+  horizontal overflow from a 320px phone through a 2560px display, in portrait and
+  landscape, with `env(safe-area-inset-*)` respected on notched devices and 16px
+  fields so iOS does not zoom on focus.
 - **Deliberately out of scope**: taxes, financing, multi-year contracts, prepaid
   annual plans, plan-level seat mix, and hiring ladders. Each would add inputs
   without changing the shape of the answer.

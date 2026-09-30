@@ -47,15 +47,26 @@ export function TopBar() {
   const resolved = resolveDark(mode) ? 'dark' : 'light';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg">
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 lg:px-5">
+    <header
+      className="sticky top-0 z-40 border-b border-line bg-bg"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+    >
+      <div
+        className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 lg:px-5"
+        style={{
+          paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+        }}
+      >
         <a
           href="#top"
           className="order-1 flex min-h-8 items-center gap-2 rounded-sm py-1"
           title="Back to top"
         >
           <BrandMark />
-          <span className="text-base font-semibold tracking-tight text-fg-strong">
+          {/* The mark carries the brand on a phone; the wordmark would push the
+              controls onto a second row. */}
+          <span className="hidden text-base font-semibold tracking-tight text-fg-strong sm:inline">
             SaaS<span className="font-medium text-muted"> Calculator</span>
           </span>
         </a>
@@ -70,7 +81,7 @@ export function TopBar() {
           />
         </div>
 
-        <div className="order-2 ml-auto flex items-center gap-1.5 lg:order-3">
+        <div className="order-2 ml-auto flex items-center gap-1 sm:gap-1.5 lg:order-3">
           <div className="flex items-center gap-0.5">
             <IconButton
               label="Undo the last change"
@@ -113,14 +124,28 @@ export function MobileRailTrigger() {
   const warningCount = warnings.length;
 
   return (
-    <div className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-4 py-2.5 lg:hidden">
+    <div
+      data-bottom-bar
+      className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-4 pt-2.5 lg:hidden"
+      style={{
+        paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom, 0px))',
+        paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+      }}
+    >
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="label-xs">MRR today</p>
-          <p className="num truncate text-base text-fg-strong">
-            {fmt.moneyCompact(derived.today.mrr)}
-            <span className="text-subtle"> · {fmt.number(derived.today.customers)} customers</span>
+          <p className="label-xs truncate">
+            MRR today
+            {/* The label row has spare width; the value row does not. Below
+                380px even this is tight, so the count is dropped rather than
+                truncated mid-word. */}
+            <span className="hidden normal-case min-[380px]:inline">
+              {' '}
+              · {fmt.number(derived.today.customers)} customers
+            </span>
           </p>
+          <p className="num truncate text-base text-fg-strong">{fmt.moneyCompact(derived.today.mrr)}</p>
         </div>
         <Button
           variant="primary"

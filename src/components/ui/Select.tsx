@@ -39,7 +39,7 @@ export function Select<T extends string>({
           aria-label={ariaLabel}
           value={value}
           onChange={(event) => onChange(event.target.value as T)}
-          className="h-8 min-w-[5.5rem] cursor-pointer appearance-none rounded-sm border border-line-strong bg-surface pl-2.5 pr-7 text-sm font-medium text-fg transition-colors hover:border-subtle focus:border-brand focus:outline-none"
+          className="h-8 min-w-[4.75rem] cursor-pointer appearance-none rounded-sm border border-line-strong bg-surface pl-2.5 pr-7 text-sm font-medium text-fg transition-colors hover:border-subtle focus:border-brand focus:outline-none sm:min-w-[5.5rem]"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
