@@ -66,6 +66,19 @@ export function createFormatters(code: CurrencyCode): Formatters {
     maximumFractionDigits: 1,
   });
 
+  // Cache Intl.NumberFormat instances with options as key to prevent repeated
+  // initialization overhead during table/chart rendering (which formats 500+ numbers per view).
+  const intlFormatCache = new Map<string, Intl.NumberFormat>();
+  function getNumberFormatter(options: Intl.NumberFormatOptions): Intl.NumberFormat {
+    const key = JSON.stringify(options);
+    let formatter = intlFormatCache.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(currency.locale, options);
+      intlFormatCache.set(key, formatter);
+    }
+    return formatter;
+  }
+
   const formatters: Formatters = {
     currency,
     symbol: currency.symbol,
@@ -77,7 +90,7 @@ export function createFormatters(code: CurrencyCode): Formatters {
           ? moneyFormatPrecise.format(value)
           : moneyFormat.format(value);
       }
-      return new Intl.NumberFormat(currency.locale, {
+      return getNumberFormatter({
         style: 'currency',
         currency: currency.code,
         currencyDisplay: 'symbol',
@@ -90,19 +103,20 @@ export function createFormatters(code: CurrencyCode): Formatters {
       if (!Number.isFinite(value)) return EMPTY;
       if (Math.abs(value) < 1000) return formatters.money(value);
       const magnitude = Math.abs(value);
-      return new Intl.NumberFormat(currency.locale, {
+      const digits = magnitude >= 10_000_000 ? 0 : decimals;
+      return getNumberFormatter({
         style: 'currency',
         currency: currency.code,
         currencyDisplay: 'narrowSymbol',
         notation: 'compact',
-        maximumFractionDigits: magnitude >= 10_000_000 ? 0 : decimals,
+        maximumFractionDigits: digits,
       }).format(value);
     },
 
     number(value, decimals = 0) {
       if (!Number.isFinite(value)) return EMPTY;
       if (decimals === 0) return numberFormat.format(value);
-      return new Intl.NumberFormat(currency.locale, {
+      return getNumberFormatter({
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
       }).format(value);
@@ -117,7 +131,7 @@ export function createFormatters(code: CurrencyCode): Formatters {
     percent(value, decimals) {
       if (!Number.isFinite(value)) return EMPTY;
       const digits = decimals ?? decimalsForMagnitude(value);
-      return `${new Intl.NumberFormat(currency.locale, {
+      return `${getNumberFormatter({
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
       }).format(value)}%`;
@@ -131,7 +145,7 @@ export function createFormatters(code: CurrencyCode): Formatters {
       if (!Number.isFinite(value)) return EMPTY;
       if (value > 100) return '100x+';
       const digits = Math.abs(value) >= 10 ? 1 : 1;
-      return `${new Intl.NumberFormat(currency.locale, {
+      return `${getNumberFormatter({
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
       }).format(value)}x`;
@@ -140,7 +154,7 @@ export function createFormatters(code: CurrencyCode): Formatters {
     months(value) {
       if (!Number.isFinite(value)) return EMPTY;
       const digits = value >= 100 ? 0 : 1;
-      return `${new Intl.NumberFormat(currency.locale, {
+      return `${getNumberFormatter({
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
       }).format(value)} mo`;
