@@ -15,21 +15,57 @@ export function ExportMenu() {
   const [open, setOpen] = useState(false);
   const container = useRef<HTMLDivElement | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     if (!open) return;
+
+    // Focus the first item when the menu opens
+    const timer = setTimeout(() => {
+      itemRefs.current[0]?.focus();
+    }, 0);
+
     const onPointerDown = (event: PointerEvent) => {
       if (!container.current?.contains(event.target as Node)) setOpen(false);
     };
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false);
         trigger.current?.focus();
+        return;
+      }
+
+      if (['ArrowDown', 'ArrowUp', 'Home', 'End', 'Tab'].includes(event.key)) {
+        const items = itemRefs.current.filter((el): el is HTMLButtonElement => el !== null);
+        if (items.length === 0) return;
+
+        if (event.key === 'Tab') {
+          setOpen(false);
+          return;
+        }
+
+        event.preventDefault();
+        const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+
+        if (event.key === 'ArrowDown') {
+          const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
+          items[nextIndex]?.focus();
+        } else if (event.key === 'ArrowUp') {
+          const prevIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+          items[prevIndex]?.focus();
+        } else if (event.key === 'Home') {
+          items[0]?.focus();
+        } else if (event.key === 'End') {
+          items[items.length - 1]?.focus();
+        }
       }
     };
+
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('keydown', onKey);
     return () => {
+      clearTimeout(timer);
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKey);
     };
@@ -108,6 +144,12 @@ export function ExportMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
+        onKeyDown={(event) => {
+          if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && !open) {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}
       >
         <Icon name="download" size={14} />
         <span className="hidden sm:inline">Export</span>
@@ -120,9 +162,12 @@ export function ExportMenu() {
           aria-label="Export"
           className="panel menu-in absolute right-0 z-50 mt-1.5 w-[17rem] overflow-hidden p-1 shadow-[var(--shadow-overlay)]"
         >
-          {actions.map((action) => (
+          {actions.map((action, index) => (
             <button
               key={action.id}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
               type="button"
               role="menuitem"
               className="flex w-full flex-col items-start gap-0.5 rounded-sm px-2.5 py-2 text-left transition-colors hover:bg-surface-2 focus-visible:bg-surface-2"
