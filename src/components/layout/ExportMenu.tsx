@@ -16,17 +16,27 @@ export function ExportMenu() {
   const container = useRef<HTMLDivElement | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const openFocus = useRef<'first' | 'last'>('first');
 
   useEffect(() => {
     if (!open) return;
+    const root = container.current;
 
-    // Focus the first item when the menu opens
+    // Focus first or last item depending on how the menu was opened (WAI-APG menu-button)
     const timer = setTimeout(() => {
-      itemRefs.current[0]?.focus();
+      const items = itemRefs.current.filter((el): el is HTMLButtonElement => el !== null);
+      if (items.length === 0) return;
+      (openFocus.current === 'last' ? items[items.length - 1] : items[0])?.focus();
     }, 0);
 
     const onPointerDown = (event: PointerEvent) => {
-      if (!container.current?.contains(event.target as Node)) setOpen(false);
+      if (!root?.contains(event.target as Node)) setOpen(false);
+    };
+
+    const onFocusOut = (event: FocusEvent) => {
+      // Close when focus leaves the menu naturally (e.g. Tab past last item).
+      // Preserves native Tab order instead of unmounting under the focused element.
+      if (!root?.contains(event.relatedTarget as Node | null)) setOpen(false);
     };
 
     const onKey = (event: KeyboardEvent) => {
@@ -36,14 +46,13 @@ export function ExportMenu() {
         return;
       }
 
-      if (['ArrowDown', 'ArrowUp', 'Home', 'End', 'Tab'].includes(event.key)) {
+      // Only handle menu keys when focus is inside the menu; otherwise we would
+      // steal ArrowUp/ArrowDown/Home/End globally while the menu happens to be open.
+      if (!root?.contains(document.activeElement)) return;
+
+      if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
         const items = itemRefs.current.filter((el): el is HTMLButtonElement => el !== null);
         if (items.length === 0) return;
-
-        if (event.key === 'Tab') {
-          setOpen(false);
-          return;
-        }
 
         event.preventDefault();
         const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
@@ -64,10 +73,12 @@ export function ExportMenu() {
 
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('keydown', onKey);
+    root?.addEventListener('focusout', onFocusOut);
     return () => {
       clearTimeout(timer);
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKey);
+      root?.removeEventListener('focusout', onFocusOut);
     };
   }, [open]);
 
@@ -143,10 +154,15 @@ export function ExportMenu() {
         ref={trigger}
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        aria-controls="export-menu"
+        onClick={() => {
+          openFocus.current = 'first';
+          setOpen((value) => !value);
+        }}
         onKeyDown={(event) => {
           if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && !open) {
             event.preventDefault();
+            openFocus.current = event.key === 'ArrowUp' ? 'last' : 'first';
             setOpen(true);
           }
         }}
@@ -159,6 +175,7 @@ export function ExportMenu() {
       {open ? (
         <div
           role="menu"
+          id="export-menu"
           aria-label="Export"
           className="panel menu-in absolute right-0 z-50 mt-1.5 w-[17rem] overflow-hidden p-1 shadow-[var(--shadow-overlay)]"
         >
