@@ -84,14 +84,14 @@ export function TopBar() {
         <div className="order-2 ml-auto flex items-center gap-1 sm:gap-1.5 lg:order-3">
           <div className="flex items-center gap-0.5">
             <IconButton
-              label="Undo the last change"
+              label="Undo the last change (⌘Z or Ctrl+Z)"
               icon="undo"
               onClick={undo}
               disabled={!canUndo}
               className="disabled:opacity-35 disabled:cursor-not-allowed"
             />
             <IconButton
-              label="Redo the change"
+              label="Redo the change (⌘⇧Z or Ctrl+Shift+Z)"
               icon="redo"
               onClick={redo}
               disabled={!canRedo}
