@@ -81,6 +81,7 @@ export function StatTile({
         type="button"
         onClick={onCopy}
         aria-label={`Copy ${label}: ${(previewing ? previewDisplay : display) ?? display}`}
+        title={`Click to copy ${label}`}
         className="group flex min-h-6 items-baseline gap-1.5 text-left"
       >
         {word && !previewing ? (
