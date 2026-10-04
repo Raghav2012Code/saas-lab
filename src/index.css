@@ -143,6 +143,10 @@
   --color-brand-strong: var(--brand-strong);
   --color-brand-soft: var(--brand-soft);
   --color-brand-fg: var(--brand-fg);
+  /* Focus ring. Without this mapping `ring-ring` is never emitted by Tailwind
+     (there is no `ring` entry in the theme), so focus indicators silently
+     fall back to `currentcolor`. */
+  --color-ring: var(--ring);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-fg: var(--accent-fg);
