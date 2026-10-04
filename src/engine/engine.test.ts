@@ -9,6 +9,7 @@ import { applyPreset, describeChanges } from './scenarios';
 import { decodeModel, encodeModel } from './share';
 import { applyLevers, EMPTY_LEVERS, type LeverValues } from './whatIf';
 import { projectionCsv } from './export';
+import { monthLabels, monthName } from '../lib/labels';
 import type { Model, MonthPoint, Simulation } from './types';
 
 const REFERENCE = new Date(Date.UTC(2026, 0, 15));
@@ -444,5 +445,24 @@ describe('formatting', () => {
     expect(usd.moneyCompact(24_780)).toBe('$24.8K');
     expect(usd.moneyCompact(1_200_000)).toBe('$1.2M');
     expect(usd.moneyCompact(500)).toBe('$500');
+  });
+
+  it('formats month labels correctly and uses cached values', () => {
+    const points = [
+      { month: 0, date: '2026-01-01' },
+      { month: 1, date: '2026-02-01' },
+      { month: 12, date: '2027-01-01' },
+    ];
+    const labels = monthLabels(points);
+    expect(labels[0]).toBe('Now');
+    expect(labels[1]).toBe('Feb');
+    expect(labels[2]).toBe("Jan ’27");
+
+    // Second call tests retrieving cached labels
+    const cachedLabels = monthLabels(points);
+    expect(cachedLabels).toEqual(labels);
+
+    expect(monthName(0)).toBe('today');
+    expect(monthName(5)).toBe('month 5');
   });
 });
