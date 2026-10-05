@@ -1,6 +1,6 @@
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { StatTile } from '../ui/StatTile';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
 import { Panel, SectionHeading } from '../ui/Panel';
@@ -33,33 +33,72 @@ export function ProjectionsTab() {
 
   const cashMarker = live.health.cashOutMonth.value;
 
-  const revenue = points.map((point) => point.revenue);
-  const costs = points.map((point) => point.cogs + point.smSpend + point.opex);
+  const revenue = useMemo(() => points.map((point) => point.revenue), [points]);
+  const costs = useMemo(() => points.map((point) => point.cogs + point.smSpend + point.opex), [points]);
 
   const previewPoints = preview ? preview.simulation.points.slice(0, horizon + 1) : null;
-  const overlays = (
-    key: 'mrr' | 'customers' | 'cash' | 'netCashFlow',
-    committed: (number | null)[],
-  ): LineSeries[] => {
-    const base: LineSeries = {
-      id: key,
-      label: key === 'customers' ? 'Customers' : key === 'cash' ? 'Cash' : 'MRR',
-      color: 'var(--series-1)',
-      values: committed,
-      area: key !== 'customers',
-    };
-    if (!previewPoints) return [base];
-    return [
-      base,
+
+  const overlays = useCallback(
+    (key: 'mrr' | 'customers' | 'cash' | 'netCashFlow', committed: (number | null)[]): LineSeries[] => {
+      const base: LineSeries = {
+        id: key,
+        label: key === 'customers' ? 'Customers' : key === 'cash' ? 'Cash' : 'MRR',
+        color: 'var(--series-1)',
+        values: committed,
+        area: key !== 'customers',
+      };
+      if (!previewPoints) return [base];
+      return [
+        base,
+        {
+          id: `${key}-preview`,
+          label: 'What if',
+          color: 'var(--accent)',
+          values: previewPoints.map((point) => point[key]),
+          dashed: true,
+        },
+      ];
+    },
+    [previewPoints],
+  );
+
+  const mrrSeries = useMemo(
+    () => overlays('mrr', points.map((point) => point.mrr)),
+    [overlays, points],
+  );
+
+  const customersSeries = useMemo(
+    () =>
+      overlays('customers', points.map((point) => point.customers)).map((seriesItem) => ({
+        ...seriesItem,
+        area: false,
+      })),
+    [overlays, points],
+  );
+
+  const revenueCostsSeries = useMemo(
+    () => [
       {
-        id: `${key}-preview`,
-        label: 'What if',
-        color: 'var(--accent)',
-        values: previewPoints.map((point) => point[key]),
-        dashed: true,
+        id: 'revenue',
+        label: 'Revenue',
+        color: 'var(--series-1)',
+        values: revenue,
+        area: true,
       },
-    ];
-  };
+      {
+        id: 'costs',
+        label: 'Total costs',
+        color: 'var(--series-4)',
+        values: costs,
+      },
+    ],
+    [revenue, costs],
+  );
+
+  const cashSeries = useMemo(
+    () => overlays('cash', points.map((point) => point.cash)),
+    [overlays, points],
+  );
 
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
@@ -120,12 +159,12 @@ export function ProjectionsTab() {
           description="Recurring revenue, compounding monthly."
         >
           <LineChart
-            series={overlays('mrr', points.map((point) => point.mrr))}
+            series={mrrSeries}
             labels={labels}
             ariaLabel={`MRR from ${fmt.money(today.mrr)} today to ${fmt.money(end.mrr)} in month ${horizon}.`}
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
+            changeFormat={fmt.moneyCompact}
             externalIndex={rowHover}
             onIndexChange={setChartHover}
             hiddenSeries={seriesToggle.hidden}
@@ -136,15 +175,12 @@ export function ProjectionsTab() {
 
         <Panel title="Customers" description="New customers minus churn, every month.">
           <LineChart
-            series={overlays('customers', points.map((point) => point.customers)).map((seriesItem) => ({
-              ...seriesItem,
-              area: false,
-            }))}
+            series={customersSeries}
             labels={labels}
             ariaLabel={`Customers from ${fmt.number(today.customers)} today to ${fmt.number(end.customers)} in month ${horizon}.`}
-            yFormat={(value) => fmt.numberCompact(value)}
-            valueFormat={(value) => fmt.number(value)}
-            changeFormat={(value) => fmt.numberCompact(value)}
+            yFormat={fmt.numberCompact}
+            valueFormat={fmt.number}
+            changeFormat={fmt.numberCompact}
             externalIndex={rowHover}
             onIndexChange={setChartHover}
             hiddenSeries={seriesToggle.hidden}
@@ -157,26 +193,12 @@ export function ProjectionsTab() {
           description="Cost of revenue, sales & marketing and operating expenses combined."
         >
           <LineChart
-            series={[
-              {
-                id: 'revenue',
-                label: 'Revenue',
-                color: 'var(--series-1)',
-                values: revenue,
-                area: true,
-              },
-              {
-                id: 'costs',
-                label: 'Total costs',
-                color: 'var(--series-4)',
-                values: costs,
-              },
-            ]}
+            series={revenueCostsSeries}
             labels={labels}
             ariaLabel={`Revenue reaching ${fmt.money(end.revenue)} against total costs of ${fmt.money(costs[costs.length - 1] ?? 0)} in month ${horizon}.`}
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
+            changeFormat={fmt.moneyCompact}
             externalIndex={rowHover}
             onIndexChange={setChartHover}
             hiddenSeries={seriesToggle.hidden}
@@ -186,13 +208,13 @@ export function ProjectionsTab() {
 
         <Panel title="Cash balance" description="The month the balance turns negative is marked.">
           <LineChart
-            series={overlays('cash', points.map((point) => point.cash))}
+            series={cashSeries}
             labels={labels}
             ariaLabel={`Cash balance from ${fmt.money(points[0]?.cash ?? 0)} today to ${fmt.money(end.cash)} in month ${horizon}.`}
             includeZero={false}
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
+            changeFormat={fmt.moneyCompact}
             externalIndex={rowHover}
             onIndexChange={setChartHover}
             hiddenSeries={seriesToggle.hidden}

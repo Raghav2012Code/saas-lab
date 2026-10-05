@@ -1,4 +1,5 @@
-import { BarChart } from '../charts/BarChart';
+import { useMemo } from 'react';
+import { BarChart, type BarSeries } from '../charts/BarChart';
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
 import { monthLabels } from '../../lib/labels';
@@ -18,28 +19,35 @@ export function FinancialHealthPanel() {
   const labels = monthLabels(points);
   const health = live.health;
 
-  const cashSeries: LineSeries[] = [
-    {
-      id: 'cash',
-      label: 'Cash',
-      color: 'var(--series-1)',
-      values: points.map((point) => point.cash),
-      area: true,
-    },
-  ];
+  const cashSeries = useMemo<LineSeries[]>(() => {
+    const result: LineSeries[] = [
+      {
+        id: 'cash',
+        label: 'Cash',
+        color: 'var(--series-1)',
+        values: points.map((point) => point.cash),
+        area: true,
+      },
+    ];
 
-  if (preview) {
-    const previewPoints = preview.simulation.points.slice(0, horizon + 1);
-    cashSeries.push({
-      id: 'cash-preview',
-      label: 'What if',
-      color: 'var(--accent)',
-      values: previewPoints.map((point) => point.cash),
-      dashed: true,
-    });
-  }
+    if (preview) {
+      const previewPoints = preview.simulation.points.slice(0, horizon + 1);
+      result.push({
+        id: 'cash-preview',
+        label: 'What if',
+        color: 'var(--accent)',
+        values: previewPoints.map((point) => point.cash),
+        dashed: true,
+      });
+    }
 
-  const netCashFlow = points.slice(1).map((point) => point.netCashFlow);
+    return result;
+  }, [points, preview, horizon]);
+
+  const netCashFlowBarSeries = useMemo<BarSeries[]>(
+    () => [{ id: 'net', label: 'Net cash flow', color: 'var(--series-1)', values: points.slice(1).map((point) => point.netCashFlow) }],
+    [points],
+  );
 
   const breakEvenMonth = health.cashOutMonth.value !== null ? health.cashOutMonth.value : null;
 
@@ -56,14 +64,14 @@ export function FinancialHealthPanel() {
             labels={labels}
             ariaLabel={`Cash balance projection over ${horizon} months, starting at ${fmt.money(points[0]?.cash ?? 0)}.`}
             includeZero={false}
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
             marker={
               breakEvenMonth !== null && breakEvenMonth <= horizon
                 ? { index: Math.round(breakEvenMonth), label: 'cash out' }
                 : null
             }
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            changeFormat={fmt.moneyCompact}
             hiddenSeries={seriesToggle.hidden}
             onToggleSeries={seriesToggle.toggle}
           />
@@ -71,13 +79,13 @@ export function FinancialHealthPanel() {
 
         <Panel title="Net cash flow" description="Gross profit less sales & marketing and operating expenses.">
           <BarChart
-            series={[{ id: 'net', label: 'Net cash flow', color: 'var(--series-1)', values: netCashFlow }]}
+            series={netCashFlowBarSeries}
             labels={labels.slice(1)}
             ariaLabel="Net cash flow per month across the projection."
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
             signColors={{ positive: 'var(--success)', negative: 'var(--danger)' }}
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            changeFormat={fmt.moneyCompact}
           />
         </Panel>
       </div>

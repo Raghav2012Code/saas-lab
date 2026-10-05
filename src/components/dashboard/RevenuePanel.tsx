@@ -1,5 +1,6 @@
+import { useMemo } from 'react';
 import { LineChart, type LineSeries } from '../charts/LineChart';
-import { WaterfallChart } from '../charts/WaterfallChart';
+import { WaterfallChart, type WaterfallItem } from '../charts/WaterfallChart';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
 import { monthLabels } from '../../lib/labels';
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
@@ -19,31 +20,46 @@ export function RevenuePanel() {
   const points = liveSimulation.points.slice(0, horizon + 1);
   const labels = monthLabels(points);
 
-  const series: LineSeries[] = [
-    {
-      id: 'mrr',
-      label: 'MRR',
-      color: 'var(--series-1)',
-      values: points.map((point) => point.mrr),
-      area: true,
-    },
-  ];
+  const series = useMemo<LineSeries[]>(() => {
+    const result: LineSeries[] = [
+      {
+        id: 'mrr',
+        label: 'MRR',
+        color: 'var(--series-1)',
+        values: points.map((point) => point.mrr),
+        area: true,
+      },
+    ];
 
-  if (preview) {
-    const previewPoints = preview.simulation.points.slice(0, horizon + 1);
-    series.push({
-      id: 'mrr-preview',
-      label: 'What if',
-      color: 'var(--accent)',
-      values: previewPoints.map((point) => point.mrr),
-      area: false,
-      dashed: true,
-    });
-  }
+    if (preview) {
+      const previewPoints = preview.simulation.points.slice(0, horizon + 1);
+      result.push({
+        id: 'mrr-preview',
+        label: 'What if',
+        color: 'var(--accent)',
+        values: previewPoints.map((point) => point.mrr),
+        area: false,
+        dashed: true,
+      });
+    }
+
+    return result;
+  }, [points, preview, horizon]);
 
   const today = live.today;
   const next = live.next;
   const netNewShare = today.mrr > 0 ? next.netNewMrr / today.mrr : null;
+
+  const waterfallItems = useMemo<WaterfallItem[]>(
+    () => [
+      { label: 'Now', value: today.mrr, kind: 'start' },
+      { label: 'New', value: next.newMrr, kind: 'delta' },
+      { label: 'Expan.', value: next.expansionMrr, kind: 'delta' },
+      { label: 'Churn', value: -next.churnedMrr, kind: 'delta' },
+      { label: 'Next', value: next.mrr, kind: 'total' },
+    ],
+    [today.mrr, next.newMrr, next.expansionMrr, next.churnedMrr, next.mrr],
+  );
 
   return (
     <div className="grid gap-4 lg:grid-cols-5">
@@ -57,9 +73,9 @@ export function RevenuePanel() {
           series={series}
           labels={labels}
           ariaLabel={`MRR projection over the next ${horizon} months, from ${fmt.money(today.mrr)} today to ${fmt.money(points[points.length - 1]?.mrr ?? today.mrr)}.`}
-          yFormat={(value) => fmt.moneyCompact(value)}
-          valueFormat={(value) => fmt.money(value)}
-          changeFormat={(value) => fmt.moneyCompact(value)}
+          yFormat={fmt.moneyCompact}
+          valueFormat={fmt.money}
+          changeFormat={fmt.moneyCompact}
           hiddenSeries={seriesToggle.hidden}
           onToggleSeries={seriesToggle.toggle}
         />
@@ -67,16 +83,10 @@ export function RevenuePanel() {
 
       <Panel className="lg:col-span-2" title="Next month's MRR bridge" description="Where the change comes from.">
         <WaterfallChart
-          items={[
-            { label: 'Now', value: today.mrr, kind: 'start' },
-            { label: 'New', value: next.newMrr, kind: 'delta' },
-            { label: 'Expan.', value: next.expansionMrr, kind: 'delta' },
-            { label: 'Churn', value: -next.churnedMrr, kind: 'delta' },
-            { label: 'Next', value: next.mrr, kind: 'total' },
-          ]}
+          items={waterfallItems}
           ariaLabel={`MRR bridge: ${fmt.money(today.mrr)} today, plus ${fmt.money(next.newMrr)} new and ${fmt.money(next.expansionMrr)} expansion, less ${fmt.money(next.churnedMrr)} churned, arriving at ${fmt.money(next.mrr)}.`}
-          yFormat={(value) => fmt.moneyCompact(value)}
-          valueFormat={(value) => fmt.moneyCompact(value)}
+          yFormat={fmt.moneyCompact}
+          valueFormat={fmt.moneyCompact}
         />
 
         <div className="mt-3 divide-y divide-line border-t border-line">

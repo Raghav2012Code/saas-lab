@@ -87,7 +87,10 @@ export function LineChart({
   const active = externalIndex ?? hovered ?? pinned;
   const showingPin = pinned !== null && hovered === null && externalIndex === null;
 
-  const visible = series.filter((item) => !hiddenSeries.includes(item.id));
+  const visible = useMemo(
+    () => series.filter((item) => !hiddenSeries.includes(item.id)),
+    [series, hiddenSeries],
+  );
   const drawable = visible.length > 0 ? visible : series;
 
   const geometry = useMemo(() => {

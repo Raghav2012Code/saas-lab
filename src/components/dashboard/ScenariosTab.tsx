@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
@@ -135,14 +135,29 @@ export function ScenariosTab() {
   const endIndex = Math.min(horizon, base?.simulation.points.length ? base.simulation.points.length - 1 : horizon);
   const labels = monthLabels(scenarios[0]?.simulation.points.slice(0, horizon + 1) ?? []);
 
-  const seriesFor = (key: 'mrr' | 'cash'): LineSeries[] =>
-    scenarios.map((scenario) => ({
-      id: scenario.id,
-      label: scenario.label,
-      color: COLORS[scenario.id] ?? 'var(--series-1)',
-      values: scenario.simulation.points.slice(0, horizon + 1).map((point) => point[key]),
-      area: scenario.id === 'base',
-    }));
+  const mrrSeries = useMemo<LineSeries[]>(
+    () =>
+      scenarios.map((scenario) => ({
+        id: scenario.id,
+        label: scenario.label,
+        color: COLORS[scenario.id] ?? 'var(--series-1)',
+        values: scenario.simulation.points.slice(0, horizon + 1).map((point) => point.mrr),
+        area: scenario.id === 'base',
+      })),
+    [scenarios, horizon],
+  );
+
+  const cashSeries = useMemo<LineSeries[]>(
+    () =>
+      scenarios.map((scenario) => ({
+        id: scenario.id,
+        label: scenario.label,
+        color: COLORS[scenario.id] ?? 'var(--series-1)',
+        values: scenario.simulation.points.slice(0, horizon + 1).map((point) => point.cash),
+        area: scenario.id === 'base',
+      })),
+    [scenarios, horizon],
+  );
 
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
@@ -231,25 +246,25 @@ export function ScenariosTab() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="MRR by scenario" description="The same compounding, three ways.">
           <LineChart
-            series={seriesFor('mrr')}
+            series={mrrSeries}
             labels={labels}
             ariaLabel="MRR projection compared across conservative, base and aggressive assumptions."
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
+            changeFormat={fmt.moneyCompact}
             hiddenSeries={seriesToggle.hidden}
             onToggleSeries={seriesToggle.toggle}
           />
         </Panel>
         <Panel title="Cash by scenario" description="Where each set of assumptions leaves the bank balance.">
           <LineChart
-            series={seriesFor('cash')}
+            series={cashSeries}
             labels={labels}
             ariaLabel="Cash balance compared across conservative, base and aggressive assumptions."
             includeZero={false}
-            yFormat={(value) => fmt.moneyCompact(value)}
-            valueFormat={(value) => fmt.money(value)}
-            changeFormat={(value) => fmt.moneyCompact(value)}
+            yFormat={fmt.moneyCompact}
+            valueFormat={fmt.money}
+            changeFormat={fmt.moneyCompact}
             hiddenSeries={seriesToggle.hidden}
             onToggleSeries={seriesToggle.toggle}
           />
