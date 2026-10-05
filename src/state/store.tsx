@@ -106,14 +106,10 @@ function readInitialModel(): Model {
   return { ...DEFAULT_MODEL };
 }
 
-function readInitialHorizon(): HorizonMonths {
-  return DEFAULT_HORIZON;
-}
-
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [model, setModelState] = useState<Model>(readInitialModel);
   const [levers, setLevers] = useState<LeverValues>(EMPTY_LEVERS);
-  const [horizon, setHorizon] = useState<HorizonMonths>(readInitialHorizon);
+  const [horizon, setHorizon] = useState<HorizonMonths>(DEFAULT_HORIZON);
   const [tab, setTab] = useState<TabId>('overview');
   const [railOpen, setRailOpen] = useState(false);
 
@@ -349,28 +345,4 @@ export function useModel(): StoreValue {
   const context = useContext(StoreContext);
   if (!context) throw new Error('useModel must be used inside StoreProvider');
   return context;
-}
-
-/**
- * The value a metric should display right now: the preview when a what-if is
- * running, otherwise the committed model.
- */
-export function useLive(): { derived: Derived; simulation: Simulation; model: Model; fmt: Formatters; previewing: boolean } {
-  const store = useModel();
-  if (store.preview) {
-    return {
-      derived: store.preview.derived,
-      simulation: store.preview.simulation,
-      model: store.preview.model,
-      fmt: store.fmt,
-      previewing: true,
-    };
-  }
-  return {
-    derived: store.derived,
-    simulation: store.simulation,
-    model: store.model,
-    fmt: store.fmt,
-    previewing: false,
-  };
 }

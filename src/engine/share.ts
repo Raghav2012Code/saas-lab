@@ -38,9 +38,9 @@ export function decodeModel(payload: string): Model | null {
   return normalizeModel(raw);
 }
 
-export function buildShareUrl(model: Model, baseUrl?: string): string {
+export function buildShareUrl(model: Model): string {
   const base =
-    baseUrl ?? (typeof window === 'undefined' ? 'https://example.com/' : `${window.location.origin}${window.location.pathname}`);
+    typeof window === 'undefined' ? 'https://example.com/' : `${window.location.origin}${window.location.pathname}`;
   return `${base}#m=${encodeURIComponent(encodeModel(model))}`;
 }
 

@@ -1,6 +1,6 @@
 import { currencyConfig, type CurrencyConfig } from './currency';
 import { finite } from './math';
-import type { CurrencyCode, Metric } from './types';
+import type { CurrencyCode } from './types';
 
 /** Shown wherever a metric genuinely cannot be computed. */
 export const EMPTY = '\u2014';
@@ -24,10 +24,6 @@ export interface Formatters {
   multiplier(value: number): string;
   /** 5.1 mo */
   months(value: number): string;
-  /** forces a leading + on positive numbers */
-  signed(text: string, value: number): string;
-  /** renders a Metric, falling back to an em dash */
-  metric(metric: Metric, render: (value: number) => string): string;
 }
 
 const cache = new Map<CurrencyCode, Formatters>();
@@ -144,10 +140,9 @@ export function createFormatters(code: CurrencyCode): Formatters {
     multiplier(value) {
       if (!Number.isFinite(value)) return EMPTY;
       if (value > 100) return '100x+';
-      const digits = Math.abs(value) >= 10 ? 1 : 1;
       return `${getNumberFormatter({
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits,
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
       }).format(value)}x`;
     },
 
@@ -158,15 +153,6 @@ export function createFormatters(code: CurrencyCode): Formatters {
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
       }).format(value)} mo`;
-    },
-
-    signed(text, value) {
-      if (!Number.isFinite(value)) return text;
-      return value > 0 ? `+${text}` : text;
-    },
-
-    metric(metric, render) {
-      return metric.value === null ? EMPTY : render(metric.value);
     },
   };
 

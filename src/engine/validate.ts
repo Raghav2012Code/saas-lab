@@ -1,4 +1,4 @@
-import { DEFAULT_MODEL, FIELD_SPECS, FIELD_SPECS_BY_KEY } from './constants';
+import { DEFAULT_MODEL, FIELD_SPECS } from './constants';
 import { isCurrencyCode } from './currency';
 import { clamp, toNumber } from './math';
 import type { AcquisitionMode, CacMode, FieldSpec, Model, NumericField } from './types';
@@ -75,10 +75,6 @@ export function modelWarnings(model: Model): FieldIssue[] {
     if (message) issues.push({ field: spec.key, message });
   }
   return issues;
-}
-
-export function fieldSpec(key: NumericField): FieldSpec {
-  return FIELD_SPECS_BY_KEY[key];
 }
 
 /** Fields that are relevant for the model's current modes, in display order. */

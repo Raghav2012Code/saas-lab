@@ -38,10 +38,6 @@ export function safeDiv(numerator: number, denominator: number): number | null {
   return Number.isFinite(result) ? result : null;
 }
 
-export function isZero(value: number, epsilon = 1e-9): boolean {
-  return Math.abs(finite(value)) < epsilon;
-}
-
 export function round(value: number, decimals = 0): number {
   const factor = 10 ** decimals;
   return Math.round(finite(value) * factor) / factor;
@@ -49,14 +45,5 @@ export function round(value: number, decimals = 0): number {
 
 /** Growth from `previous` to `current`, as a fraction. Null when undefined. */
 export function growthRate(current: number, previous: number): number | null {
-  const ratio = safeDiv(current - previous, previous);
-  if (ratio === null) return null;
-  return Number.isFinite(ratio) ? ratio : null;
-}
-
-/** Compounding, with a hard guard against overflow on long horizons. */
-export function compound(base: number, rate: number, periods: number): number {
-  const value = base * (1 + rate) ** periods;
-  if (!Number.isFinite(value)) return base;
-  return value;
+  return safeDiv(current - previous, previous);
 }

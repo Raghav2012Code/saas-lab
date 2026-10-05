@@ -1,4 +1,4 @@
-import { FIELD_SPECS, MODEL_VERSION } from '../engine/constants';
+import { MODEL_VERSION } from '../engine/constants';
 import type { Formatters } from '../engine/format';
 import type { ModelExport } from '../engine/export';
 import { visibleFields } from '../engine/validate';
@@ -24,7 +24,7 @@ export function assumptionRows(model: Model, fmt: Formatters): { label: string; 
     { label: 'Volume driven by', value: modeNames[model.acquisitionMode] ?? model.acquisitionMode },
     { label: 'CAC from', value: model.cacMode === 'spend' ? 'Sales & marketing spend' : 'Entered directly' },
     ...rows,
-  ].map((row) => row);
+  ];
 }
 
 export function buildModelExport(model: Model, derived: Derived, fmt: Formatters): ModelExport {
@@ -49,12 +49,4 @@ export function buildModelExport(model: Model, derived: Derived, fmt: Formatters
         derived.health.breakEvenMrr.value === null ? null : fmt.money(derived.health.breakEvenMrr.value),
     },
   };
-}
-
-export function assumptionFieldCount(model: Model): number {
-  return FIELD_SPECS.filter((spec) => {
-    if (spec.acquisitionModes && !spec.acquisitionModes.includes(model.acquisitionMode)) return false;
-    if (spec.cacModes && !spec.cacModes.includes(model.cacMode)) return false;
-    return true;
-  }).length;
 }

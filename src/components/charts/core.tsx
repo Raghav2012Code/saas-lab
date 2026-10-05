@@ -13,12 +13,6 @@ export interface Padding {
 
 export const DEFAULT_PADDING: Padding = { top: 12, right: 14, bottom: 26, left: 46 };
 
-export function linearScale(domainMin: number, domainMax: number, rangeMin: number, rangeMax: number) {
-  const span = domainMax - domainMin;
-  const safeSpan = span === 0 ? 1 : span;
-  return (value: number) => rangeMin + ((value - domainMin) / safeSpan) * (rangeMax - rangeMin);
-}
-
 /**
  * A rounded axis domain plus the ticks inside it. Rounding to the step means
  * every series fits and both ends of the axis land on a gridline.

@@ -7,7 +7,6 @@ import { useCallback, useState } from 'react';
 export function useSeriesToggle(): {
   hidden: string[];
   toggle: (id: string) => void;
-  reset: () => void;
 } {
   const [hidden, setHidden] = useState<string[]>([]);
 
@@ -17,7 +16,5 @@ export function useSeriesToggle(): {
     );
   }, []);
 
-  const reset = useCallback(() => setHidden([]), []);
-
-  return { hidden, toggle, reset };
+  return { hidden, toggle };
 }

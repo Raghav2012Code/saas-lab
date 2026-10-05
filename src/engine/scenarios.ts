@@ -2,7 +2,7 @@ import { createFormatters } from './format';
 import { acquisitionDriverField, cacDriverField, simulate } from './model';
 import { finite } from './math';
 import { derive } from './metrics';
-import { FIELD_SPECS, SCENARIO_PRESETS, SCENARIO_PRESET_BY_ID } from './constants';
+import { FIELD_SPECS, FIELD_SPECS_BY_KEY, SCENARIO_PRESET_BY_ID } from './constants';
 import { clampField } from './validate';
 import type { ModelChange, Model, NumericField, ScenarioId, ScenarioResult } from './types';
 
@@ -20,7 +20,7 @@ export function applyPreset(model: Model, id: Exclude<ScenarioId, 'base'>): Mode
   const cacField = cacDriverField(model);
 
   const apply = (field: NumericField, op: { op: 'add' | 'multiply'; value: number }) => {
-    const spec = FIELD_SPECS.find((item) => item.key === field);
+    const spec = FIELD_SPECS_BY_KEY[field];
     if (!spec) return;
     const current = finite(next[field]);
     const result = op.op === 'multiply' ? current * op.value : current + op.value;
@@ -43,7 +43,7 @@ export function applyPreset(model: Model, id: Exclude<ScenarioId, 'base'>): Mode
 }
 
 function formatChangeValue(model: Model, field: NumericField, delta: number): string {
-  const spec = FIELD_SPECS.find((item) => item.key === field);
+  const spec = FIELD_SPECS_BY_KEY[field];
   const formatters = createFormatters(model.currency);
   const sign = delta > 0 ? '+' : '-';
   const magnitude = Math.abs(delta);
@@ -112,10 +112,4 @@ export function buildScenarios(model: Model): ScenarioResult[] {
       changes: describeChanges(model, entry.model),
     };
   });
-}
-
-export const SCENARIO_ORDER: ScenarioId[] = ['conservative', 'base', 'aggressive'];
-
-export function scenarioPresetSummary(id: Exclude<ScenarioId, 'base'>): string {
-  return SCENARIO_PRESETS.find((preset) => preset.id === id)?.description ?? '';
 }
