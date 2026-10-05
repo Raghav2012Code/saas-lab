@@ -20,3 +20,8 @@ function formatMonthLabel(dateStr: string): string {
 export function monthLabels(points: { month: number; date: string }[]): string[] {
   return points.map((point) => (point.month === 0 ? 'Now' : formatMonthLabel(point.date)));
 }
+
+/** "Month 14" style label for a month index. */
+export function monthName(index: number): string {
+  return index === 0 ? 'today' : `month ${index}`;
+}
