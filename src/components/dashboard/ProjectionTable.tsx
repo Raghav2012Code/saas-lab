@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 
 import type { MonthPoint } from '../../engine/types';
 import { monthLabels } from '../../lib/labels';
@@ -127,7 +127,9 @@ interface ProjectionTableProps {
  * in is traced across the whole table, the row you are on drives the charts
  * above, and every column explains itself on hover or focus.
  */
-export function ProjectionTable({
+// Optimization: Memoize ProjectionTable to prevent unnecessary re-renders of the large 25x13 data table
+// when parent components re-render (e.g. state changes in ProjectionsTab or store context updates).
+export const ProjectionTable = memo(function ProjectionTable({
   points,
   cashOutMonth = null,
   breakEvenMonth = null,
@@ -231,4 +233,4 @@ export function ProjectionTable({
       </table>
     </div>
   );
-}
+});
