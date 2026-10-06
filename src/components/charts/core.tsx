@@ -323,6 +323,40 @@ export interface TooltipItem {
   lowerIsBetter?: boolean;
 }
 
+interface TooltipSource {
+  id: string;
+  label: string;
+  color: string;
+  values: (number | null)[];
+}
+
+/** Readout rows for one period: exact values plus the move since the previous. */
+export function tooltipItems(
+  shown: TooltipSource[],
+  index: number,
+  valueFormat: (value: number) => string,
+  changeFormat: ((value: number) => string) | undefined,
+  colorOf?: (item: TooltipSource, value: number | null | undefined) => string,
+): TooltipItem[] {
+  return shown.map((item) => {
+    const value = item.values[index];
+    const previous = index > 0 ? item.values[index - 1] : null;
+    let change: string | null = null;
+    if (changeFormat && value !== null && value !== undefined && previous !== null && previous !== undefined) {
+      const delta = value - previous;
+      if (Math.abs(delta) > 1e-9) change = `${delta > 0 ? '+' : '-'}${changeFormat(Math.abs(delta))}`;
+    }
+    return {
+      id: item.id,
+      label: item.label,
+      value: value === null || value === undefined ? '\u2014' : valueFormat(value),
+      color: colorOf ? colorOf(item, value) : item.color,
+      change,
+      lowerIsBetter: false,
+    };
+  });
+}
+
 /**
  * The readout card. It carries the period, every series at that period, and the
  * movement since the period before — which is what you actually want to know

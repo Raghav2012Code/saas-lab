@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
 
 import { cx } from '../../lib/cx';
-import { Icon, type IconName } from './Icon';
+import { Icon } from './Icon';
 import { InfoTip } from './InfoTip';
-import { Pill, type PillTone } from './Pill';
 
 interface PanelProps {
   title?: ReactNode;
@@ -12,12 +11,11 @@ interface PanelProps {
   /** removes the body padding, for charts and tables */
   flush?: boolean;
   className?: string;
-  bodyClassName?: string;
   children: ReactNode;
 }
 
 /** The one bordered container in the app. Used for charts, tables and tools. */
-export function Panel({ title, description, actions, flush, className, bodyClassName, children }: PanelProps) {
+export function Panel({ title, description, actions, flush, className, children }: PanelProps) {
   const hasHead = Boolean(title || description || actions);
   return (
     <section className={cx('panel', className)}>
@@ -30,7 +28,7 @@ export function Panel({ title, description, actions, flush, className, bodyClass
           {actions ? <div className="flex shrink-0 items-center gap-1.5">{actions}</div> : null}
         </header>
       ) : null}
-      <div className={cx(flush ? 'panel-body-flush' : 'panel-body', bodyClassName)}>{children}</div>
+      <div className={flush ? 'panel-body-flush' : 'panel-body'}>{children}</div>
     </section>
   );
 }
@@ -105,14 +103,12 @@ export function StatRow({
 /** An inline, non-alarming note — used instead of a fabricated number. */
 export function InlineNote({
   tone = 'neutral',
-  icon,
   children,
 }: {
   tone?: 'neutral' | 'warn' | 'accent';
-  icon?: IconName;
   children: ReactNode;
 }) {
-  const resolvedIcon = icon ?? (tone === 'neutral' ? 'info' : 'warning');
+  const resolvedIcon = tone === 'neutral' ? 'info' : 'warning';
   return (
     <p
       className={cx(
@@ -127,17 +123,3 @@ export function InlineNote({
     </p>
   );
 }
-
-/** Renders a metric that could not be computed, with the reason why. */
-export function NotApplicable({ reason, className }: { reason?: string; className?: string }) {
-  const text = reason ?? 'Not available with these assumptions.';
-  return (
-    <span className={cx('inline-flex items-center gap-1.5', className)}>
-      <span className="num text-base text-subtle">&mdash;</span>
-      <Pill tone="neutral">Not applicable</Pill>
-      <InfoTip label="Why this is not available">{text}</InfoTip>
-    </span>
-  );
-}
-
-export type { PillTone };

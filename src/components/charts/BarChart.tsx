@@ -10,6 +10,7 @@ import {
   DEFAULT_PADDING,
   labelStride,
   niceDomain,
+  tooltipItems,
   tooltipPlacement,
   toUserX,
   valueExtent,
@@ -132,23 +133,13 @@ export function BarChart({
   };
 
   const readIndex = active ?? count - 1;
-  const items = (active === null ? series : drawable).map((item) => {
-    const value = item.values[readIndex];
-    const previous = readIndex > 0 ? item.values[readIndex - 1] : null;
-    let change: string | null = null;
-    if (changeFormat && value !== null && value !== undefined && previous !== null && previous !== undefined) {
-      const delta = value - previous;
-      if (Math.abs(delta) > 1e-9) change = `${delta > 0 ? '+' : '-'}${changeFormat(Math.abs(delta))}`;
-    }
-    return {
-      id: item.id,
-      label: item.label,
-      value: value === null || value === undefined ? '\u2014' : valueFormat(value),
-      color: signColors && series.length === 1 ? (value !== null && value !== undefined && value >= 0 ? signColors.positive : signColors.negative) : item.color,
-      change,
-      lowerIsBetter: false,
-    };
-  });
+  const items = tooltipItems(active === null ? series : drawable, readIndex, valueFormat, changeFormat, (item, value) =>
+    signColors && series.length === 1
+      ? value !== null && value !== undefined && value >= 0
+        ? signColors.positive
+        : signColors.negative
+      : item.color,
+  );
 
   const placement =
     active !== null ? tooltipPlacement(xCenter(active), padding.top + 4, chartWidth, height, 208, 88) : null;

@@ -31,12 +31,10 @@ export function DeltaPill({
   text,
   /** true when a rise is the good outcome */
   higherIsBetter = true,
-  tone,
 }: {
   value: number | null;
   text: string;
   higherIsBetter?: boolean;
-  tone?: PillTone;
 }) {
   if (value === null || !Number.isFinite(value)) {
     return <Pill tone="neutral">no change</Pill>;
@@ -44,7 +42,7 @@ export function DeltaPill({
 
   const rising = value > 0;
   const flat = Math.abs(value) < 1e-9;
-  const resolved: PillTone = tone ?? (flat ? 'neutral' : rising === higherIsBetter ? 'good' : 'bad');
+  const resolved: PillTone = flat ? 'neutral' : rising === higherIsBetter ? 'good' : 'bad';
 
   return (
     <Pill tone={resolved} icon={flat ? undefined : rising ? 'arrowUp' : 'arrowDown'}>

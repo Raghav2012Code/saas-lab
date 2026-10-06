@@ -1,6 +1,6 @@
 import { DEFAULT_MODEL, FIELD_SPECS } from './constants';
 import { isCurrencyCode } from './currency';
-import { clamp, toNumber } from './math';
+import { toNumber } from './math';
 import type { AcquisitionMode, CacMode, FieldSpec, Model, NumericField } from './types';
 
 const ACQUISITION_MODES: AcquisitionMode[] = ['funnel', 'direct', 'growth'];
@@ -16,7 +16,7 @@ export function parseNumericInput(text: string): number | null {
 
 /** Clamps a raw value into a field's hard bounds. */
 export function clampField(spec: FieldSpec, value: number): number {
-  return clamp(toNumber(value, 0, spec.min, spec.max), spec.min, spec.max);
+  return toNumber(value, 0, spec.min, spec.max);
 }
 
 /** A soft warning for a value that is legal but unusual. Null when fine. */

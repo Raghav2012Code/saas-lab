@@ -14,13 +14,3 @@ export function TileGrid({ children }: { children: ReactNode }) {
 export function Tile({ children }: { children: ReactNode }) {
   return <div className="min-w-0 bg-surface px-4">{children}</div>;
 }
-
-/** A labelled group of rows inside a panel. */
-export function RowGroup({ title, children }: { title?: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col">
-      {title ? <h3 className="label-xs pb-1.5">{title}</h3> : null}
-      <div className="divide-y divide-line">{children}</div>
-    </div>
-  );
-}

@@ -14,6 +14,7 @@ import {
   linePath,
   nearestIndex,
   niceDomain,
+  tooltipItems,
   tooltipPlacement,
   toUserX,
   valueExtent,
@@ -157,22 +158,7 @@ export function LineChart({
 
   const readIndex = active ?? count - 1;
 
-  const items = (active === null ? series : drawable).map((item) => {
-    const value = item.values[readIndex];
-    const previous = readIndex > 0 ? item.values[readIndex - 1] : null;
-    let change: string | null = null;
-    if (changeFormat && value !== null && value !== undefined && previous !== null && previous !== undefined) {
-      const delta = value - previous;
-      if (Math.abs(delta) > 1e-9) change = `${delta > 0 ? '+' : '-'}${changeFormat(Math.abs(delta))}`;
-    }
-    return {
-      id: item.id,
-      label: item.label,
-      value: value === null || value === undefined ? '\u2014' : valueFormat(value),
-      color: item.color,
-      change,
-    };
-  });
+  const items = tooltipItems(active === null ? series : drawable, readIndex, valueFormat, changeFormat);
 
   const placement =
     active !== null
