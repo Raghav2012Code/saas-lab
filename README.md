@@ -1,5 +1,7 @@
 ﻿# SaaS Calculator
 
+[![check](https://github.com/Raghav2012Code/saas-lab/actions/workflows/check.yml/badge.svg)](https://github.com/Raghav2012Code/saas-lab/actions/workflows/check.yml)
+
 Enter your SaaS assumptions once, and every important metric recalculates together —
 MRR, ARR, customers, churn, LTV, CAC payback, runway, break-even and the projections
 that follow from them.
@@ -121,6 +123,8 @@ npm run contrast    # WCAG AA contrast gate for every token pair, both themes
 npm run build       # typecheck + production build
 npm run check       # all of the above
 ```
+
+PRs run `npm run check` automatically via CI.
 
 Lighthouse reports **Accessibility 100, Best Practices 100, SEO 100**, with no
 console errors. Every interactive target is at least 24px, the heading outline is
