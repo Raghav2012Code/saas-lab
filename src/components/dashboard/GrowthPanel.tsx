@@ -1,5 +1,6 @@
 import { FunnelChart, type FunnelStage } from '../charts/FunnelChart';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
+import { Abbr } from '../ui/Abbr';
 import { InfoTip } from '../ui/InfoTip';
 import { useModel } from '../../state/store';
 
@@ -88,7 +89,13 @@ export function GrowthPanel() {
           <div className="flex flex-col gap-3">
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-sm text-muted">
-                {model.acquisitionMode === 'direct' ? 'New customers' : 'Target MRR growth'}
+                {model.acquisitionMode === 'direct' ? (
+                  'New customers'
+                ) : (
+                  <>
+                    Target <Abbr term="MRR" full="Monthly recurring revenue" /> growth
+                  </>
+                )}
               </span>
               <span className="num text-lg text-fg-strong">
                 {model.acquisitionMode === 'direct'
@@ -131,7 +138,12 @@ export function GrowthPanel() {
           <StatRow
             label="Expansion"
             value={`${fmt.percent(model.monthlyExpansionPct)}/mo`}
-            detail="Raises ARPU from the customers you already have; it never adds customers."
+            detail={
+              <>
+                Raises <Abbr term="ARPU" full="Average revenue per user" /> from the customers you already have; it
+                never adds customers.
+              </>
+            }
           />
           <StatRow
             label="Net revenue retention"

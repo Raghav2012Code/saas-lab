@@ -1,4 +1,5 @@
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
+import { Abbr } from '../ui/Abbr';
 import { InfoTip } from '../ui/InfoTip';
 import { Pill } from '../ui/Pill';
 import { present } from '../../lib/levers';
@@ -100,7 +101,8 @@ export function UnitEconomicsPanel() {
         <InfoTip label="Unit economics">
           <span className="block font-medium text-fg-strong">Methodology</span>
           <span className="mt-1 block text-muted">
-            LTV = ARPU × gross margin ÷ monthly churn, which is the cumulative gross profit over an average
+            <Abbr term="LTV" full="Lifetime value" /> = <Abbr term="ARPU" full="Average revenue per user" />{' '}
+            × gross margin ÷ monthly churn, which is the cumulative gross profit over an average
             lifetime of 1 ÷ churn months. Expansion is excluded to keep it conservative.
           </span>
         </InfoTip>
@@ -130,7 +132,7 @@ export function UnitEconomicsPanel() {
           <div className="flex items-center gap-2">
             <span className="num text-lg text-fg-strong">{present(ratio, (value) => fmt.multiplier(value)).display}</span>
             <Pill tone={ratio.value === null ? 'neutral' : (ratio.value ?? 0) >= 3 ? 'good' : 'warn'}>
-              LTV : CAC
+              LTV : <Abbr term="CAC" full="Customer acquisition cost" />
             </Pill>
             {ratio.reason ? <InfoTip label="Why this ratio is unavailable">{ratio.reason}</InfoTip> : null}
           </div>
@@ -146,7 +148,12 @@ export function UnitEconomicsPanel() {
           <StatRow
             label="Revenue per customer"
             value={`${fmt.money(live.unit.arpu)}/mo`}
-            detail="Blended across every plan, and the figure MRR is built from."
+            detail={
+              <>
+                Blended across every plan, and the figure <Abbr term="MRR" full="Monthly recurring revenue" /> is
+                built from.
+              </>
+            }
           />
           <StatRow
             label="Gross profit per customer"

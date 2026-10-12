@@ -1,5 +1,6 @@
 import { leverDescriptions } from '../../lib/levers';
 import { useModel } from '../../state/store';
+import { Abbr } from '../ui/Abbr';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Pill } from '../ui/Pill';
@@ -29,7 +30,7 @@ export function PreviewBanner() {
 
         <div className="flex items-center gap-2">
           <span className="num hidden text-xs text-accent-fg sm:inline">
-            MRR {fmt.moneyCompact(preview.derived.today.mrr)}
+            <Abbr term="MRR" full="Monthly recurring revenue" /> {fmt.moneyCompact(preview.derived.today.mrr)}
           </span>
           <Button size="sm" variant="primary" onClick={applyPreview}>
             Apply

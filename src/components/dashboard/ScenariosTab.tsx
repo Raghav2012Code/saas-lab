@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
+import { Abbr } from '../ui/Abbr';
 import { Icon } from '../ui/Icon';
 import { InlineNote, Panel, SectionHeading } from '../ui/Panel';
 import { Button } from '../ui/Button';
@@ -23,8 +24,8 @@ const COLORS: Record<string, string> = {
 
 interface Row {
   id: string;
-  label: string;
-  detail: string;
+  label: ReactNode;
+  detail: ReactNode;
   value: (result: ScenarioResult, endIndex: number) => string;
 }
 
@@ -43,13 +44,21 @@ export function ScenariosTab() {
   const rows: Row[] = [
     {
       id: 'mrr',
-      label: `MRR in month ${horizon}`,
+      label: (
+        <>
+          <Abbr term="MRR" full="Monthly recurring revenue" /> in month {horizon}
+        </>
+      ),
       detail: 'Recurring revenue at the end of the projection.',
       value: (result, endIndex) => fmt.money(result.simulation.points[endIndex]?.mrr ?? 0),
     },
     {
       id: 'arr',
-      label: `ARR in month ${horizon}`,
+      label: (
+        <>
+          <Abbr term="ARR" full="Annual recurring revenue" /> in month {horizon}
+        </>
+      ),
       detail: 'MRR at the end of the projection × 12.',
       value: (result, endIndex) => fmt.money(result.simulation.points[endIndex]?.arr ?? 0),
     },
@@ -87,7 +96,11 @@ export function ScenariosTab() {
     },
     {
       id: 'ltvCac',
-      label: 'LTV : CAC',
+      label: (
+        <>
+          <Abbr term="LTV" full="Lifetime value" /> : <Abbr term="CAC" full="Customer acquisition cost" />
+        </>
+      ),
       detail: 'Lifetime gross profit per customer against acquisition cost.',
       value: (result) => present(result.derived.unit.ltvToCac, (value) => fmt.multiplier(value)).display,
     },

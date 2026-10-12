@@ -1,5 +1,6 @@
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { StatTile } from '../ui/StatTile';
+import { Abbr } from '../ui/Abbr';
 import { useState } from 'react';
 
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
@@ -116,7 +117,7 @@ export function ProjectionsTab() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel
-          title="MRR"
+          title={<Abbr term="MRR" full="Monthly recurring revenue" />}
           description="Recurring revenue, compounding monthly."
         >
           <LineChart

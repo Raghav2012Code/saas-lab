@@ -4,6 +4,7 @@ import { assumptionRows } from '../../lib/export-model';
 import { useModel } from '../../state/store';
 import { Panel, SectionHeading } from '../ui/Panel';
 import { Pill } from '../ui/Pill';
+import { GuideSection } from './GuideSection';
 
 /** Every formula, assumption and benchmark the app uses, in one place. */
 export function MethodologyTab() {
@@ -115,6 +116,8 @@ export function MethodologyTab() {
           </ul>
         </Panel>
       </div>
+
+      <GuideSection />
     </div>
   );
 }

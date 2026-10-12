@@ -1,16 +1,17 @@
-import { memo, useState } from 'react';
+import { memo, useState, type ReactNode } from 'react';
 
 import type { MonthPoint } from '../../engine/types';
 import { monthLabels } from '../../lib/labels';
 import { cx } from '../../lib/cx';
 import { useModel } from '../../state/store';
+import { Abbr } from '../ui/Abbr';
 import { Icon } from '../ui/Icon';
 import { InfoTip } from '../ui/InfoTip';
 
 interface Column {
   key: string;
   label: string;
-  explain: string;
+  explain: ReactNode;
   /** how to render the value; defaults to a signed number */
   value: (point: MonthPoint, fmt: ReturnType<typeof useModel>['fmt']) => string;
   tone?: (point: MonthPoint) => 'default' | 'muted' | 'good' | 'bad';
@@ -46,7 +47,12 @@ const COLUMNS: Column[] = [
   {
     key: 'newMrr',
     label: 'New MRR',
-    explain: 'Revenue added by this month’s new customers, valued at this month’s ARPU.',
+    explain: (
+      <>
+        Revenue added by this month&rsquo;s new customers, valued at this month&rsquo;s{' '}
+        <Abbr term="ARPU" full="Average revenue per user" />.
+      </>
+    ),
     value: (p, fmt) => fmt.money(p.newMrr),
   },
   {
@@ -65,7 +71,12 @@ const COLUMNS: Column[] = [
   {
     key: 'netNewMrr',
     label: 'Net new',
-    explain: 'New plus expansion, less churned. This always equals the change in MRR.',
+    explain: (
+      <>
+        New plus expansion, less churned. This always equals the change in{' '}
+        <Abbr term="MRR" full="Monthly recurring revenue" />.
+      </>
+    ),
     value: (p, fmt) =>
       p.netNewMrr >= 0 ? `+${fmt.money(p.netNewMrr)}` : `-${fmt.money(Math.abs(p.netNewMrr))}`,
     tone: (p) => (p.netNewMrr >= 0 ? 'good' : 'bad'),
@@ -79,7 +90,12 @@ const COLUMNS: Column[] = [
   {
     key: 'smSpend',
     label: 'Sales & marketing',
-    explain: 'Sales & marketing. Customer acquisition cost (CAC) × new customers, so spend follows acquisition volume.',
+    explain: (
+      <>
+        Sales &amp; marketing. <Abbr term="CAC" full="Customer acquisition cost" /> × new customers, so spend
+        follows acquisition volume.
+      </>
+    ),
     value: (p, fmt) => `-${fmt.money(p.smSpend)}`,
     tone: () => 'muted',
   },

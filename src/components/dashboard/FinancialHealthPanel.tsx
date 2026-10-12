@@ -1,6 +1,7 @@
 import { BarChart } from '../charts/BarChart';
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
+import { Abbr } from '../ui/Abbr';
 import { monthLabels } from '../../lib/labels';
 import { present } from '../../lib/levers';
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
@@ -138,8 +139,12 @@ export function FinancialHealthPanel() {
               label="Break-even MRR"
               value={present(health.breakEvenMrr, (value) => fmt.money(value)).display}
               detail={
-                health.breakEvenMrr.reason ??
-                'Steady-state MRR where net cash flow reaches zero, assuming acquisition at replacement rate and no expansion.'
+                health.breakEvenMrr.reason ?? (
+                  <>
+                    Steady-state <Abbr term="MRR" full="Monthly recurring revenue" /> where net cash flow reaches
+                    zero, assuming acquisition at replacement rate and no expansion.
+                  </>
+                )
               }
             />
             <StatRow

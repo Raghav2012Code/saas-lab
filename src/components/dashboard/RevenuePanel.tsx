@@ -1,5 +1,6 @@
 import { LineChart, type LineSeries } from '../charts/LineChart';
 import { WaterfallChart } from '../charts/WaterfallChart';
+import { Abbr } from '../ui/Abbr';
 import { InlineNote, Panel, StatRow } from '../ui/Panel';
 import { monthLabels } from '../../lib/labels';
 import { useSeriesToggle } from '../../hooks/useSeriesToggle';
@@ -49,7 +50,11 @@ export function RevenuePanel() {
     <div className="grid gap-4 lg:grid-cols-5">
       <Panel
         className="lg:col-span-3"
-        title="MRR, month by month"
+        title={
+          <>
+            <Abbr term="MRR" full="Monthly recurring revenue" />, month by month
+          </>
+        }
         description="Fixed assumptions compound: growth slows as churn catches up with acquisition."
         actions={<HorizonControl label="Projection length for revenue" />}
       >

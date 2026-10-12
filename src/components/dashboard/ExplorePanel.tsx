@@ -1,17 +1,19 @@
 import { FIELD_SPECS_BY_KEY } from '../../engine/constants';
 import type { Formatters } from '../../engine/format';
 import type { Derived } from '../../engine/types';
+import type { ReactNode } from 'react';
 import { activeLevers, leverValue, visibleLevers } from '../../engine/whatIf';
 import { pointDelta, relativeDelta, type DeltaText } from '../../lib/delta';
 import { formatFieldValue } from '../../lib/field-format';
 import { useModel } from '../../state/store';
 import { InlineNote, Panel } from '../ui/Panel';
+import { Abbr } from '../ui/Abbr';
 import { DeltaPill } from '../ui/Pill';
 import { Slider } from '../ui/Slider';
 
 interface ImpactRow {
   id: string;
-  label: string;
+  label: ReactNode;
   before: number | null;
   after: number | null;
   render: (value: number) => string;
@@ -27,7 +29,7 @@ function buildRows(committed: Derived, next: Derived, fmt: Formatters): ImpactRo
   const rows: ImpactRow[] = [
     {
       id: 'mrr',
-      label: 'MRR',
+      label: <Abbr term="MRR" full="Monthly recurring revenue" />,
       before: committed.today.mrr,
       after: next.today.mrr,
       render: money,
@@ -35,7 +37,7 @@ function buildRows(committed: Derived, next: Derived, fmt: Formatters): ImpactRo
     },
     {
       id: 'arr',
-      label: 'ARR',
+      label: <Abbr term="ARR" full="Annual recurring revenue" />,
       before: committed.today.arr,
       after: next.today.arr,
       render: money,
@@ -63,7 +65,7 @@ function buildRows(committed: Derived, next: Derived, fmt: Formatters): ImpactRo
     },
     {
       id: 'ltv',
-      label: 'LTV',
+      label: <Abbr term="LTV" full="Lifetime value" />,
       before: committed.unit.ltv.value,
       after: next.unit.ltv.value,
       render: money,
@@ -71,7 +73,11 @@ function buildRows(committed: Derived, next: Derived, fmt: Formatters): ImpactRo
     },
     {
       id: 'ltvCac',
-      label: 'LTV : CAC',
+      label: (
+        <>
+          LTV : <Abbr term="CAC" full="Customer acquisition cost" />
+        </>
+      ),
       before: committed.unit.ltvToCac.value,
       after: next.unit.ltvToCac.value,
       render: (value) => fmt.multiplier(value),
