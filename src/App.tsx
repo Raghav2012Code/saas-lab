@@ -26,7 +26,7 @@ function Toast() {
       style={{ bottom: 'calc(var(--bottom-bar-h, 0px) + 1.25rem)' }}
     >
       <div
-        className={`flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-[var(--shadow-overlay)] ${
+        className={`flex items-center gap-2 rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-fg ${
           closing ? 'fade-out' : 'fade-in'
         }`}
       >

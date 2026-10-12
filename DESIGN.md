@@ -263,6 +263,18 @@ Two deviations are deliberate and recorded rather than accidental:
   information required to identify a component or state, which is
   `--border-strong`'s job; separators carry no state.
 
+A fifth pass fixed copy precision and small a11y gaps from the first two phases:
+
+| Finding | Resolution |
+|---|---|
+| Overview eyebrow `Today, {date}` read as the model's date | eyebrow now reads `Opened {date}`; description already states balances are today |
+| Headline MRR detail said the badge compares saved vs what-if (true of no badge; ghosts do that) | copy now: badges compare saved model against benchmarks, ghost values show the what-if |
+| Every `HorizonControl` announced an identical "Projection length" group name | control takes an optional `label` prop (default unchanged) so callers can disambiguate |
+| Advisories rendered as stacked `div`s | list markup (`ul` / `li`); severity still carried by colour + title text |
+| Methodology heading claimed "Exactly how every number is calculated" | "How every number is calculated", limits stated alongside definitions |
+| Methodology panel copy ("feeding the model", "judge them") read as casual/absolute | "Which inputs the model currently uses", "stated plainly with their limits" |
+| Unknown benchmark ids leaked their raw key into the UI | fallback renders "Unknown" |
+
 ## Slop audit
 
 Checked against the failure catalogue and the artifact-type gate:

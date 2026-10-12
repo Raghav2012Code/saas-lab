@@ -25,7 +25,7 @@ export function Panel({ title, description, actions, flush, className, children 
             {title ? <h3 className="text-base font-semibold text-fg-strong">{title}</h3> : null}
             {description ? <p className="mt-0.5 max-w-prose text-sm text-muted">{description}</p> : null}
           </div>
-          {actions ? <div className="flex shrink-0 items-center gap-1.5">{actions}</div> : null}
+          {actions ? <div className="flex min-w-0 flex-wrap items-center gap-2 shrink-0">{actions}</div> : null}
         </header>
       ) : null}
       <div className={flush ? 'panel-body-flush' : 'panel-body'}>{children}</div>
@@ -112,7 +112,7 @@ export function InlineNote({
   return (
     <p
       className={cx(
-        'flex items-start gap-1.5 text-xs leading-relaxed',
+        'flex items-start gap-1.5 text-sm leading-relaxed',
         tone === 'warn' ? 'text-accent-fg' : 'text-muted',
       )}
     >
