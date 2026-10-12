@@ -97,7 +97,7 @@ export function StatTile({
             {previewing ? previewDisplay : reason ? '\u2014' : display}
           </span>
         )}
-        <span className="text-subtle opacity-0 transition-opacity group-hover:opacity-70 group-focus-visible:opacity-70">
+        <span className="text-subtle opacity-40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
           <Icon name="copy" size={13} />
         </span>
       </button>

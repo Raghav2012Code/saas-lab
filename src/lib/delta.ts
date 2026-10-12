@@ -6,6 +6,17 @@ export interface DeltaText {
   higherIsBetter?: boolean;
 }
 
+function deltaBase(
+  from: number | null | undefined,
+  to: number | null | undefined,
+): { change: number; from: number } | { empty: true } | undefined {
+  if (from === null || from === undefined || to === null || to === undefined) return undefined;
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return undefined;
+  const change = to - from;
+  if (Math.abs(change) < 1e-9) return { empty: true };
+  return { change, from };
+}
+
 /** Relative change between two values, for "what if" comparisons. */
 export function relativeDelta(
   from: number | null | undefined,
@@ -13,13 +24,12 @@ export function relativeDelta(
   fmt: Formatters,
   higherIsBetter = true,
 ): DeltaText | undefined {
-  if (from === null || from === undefined || to === null || to === undefined) return undefined;
-  if (!Number.isFinite(from) || !Number.isFinite(to)) return undefined;
+  const base = deltaBase(from, to);
+  if (!base || 'empty' in base) return base ? { value: 0, text: 'no change', higherIsBetter } : undefined;
 
-  const change = to - from;
-  if (Math.abs(change) < 1e-9) return { value: 0, text: 'no change', higherIsBetter };
+  const change = base.change;
 
-  const relative = from === 0 ? null : change / Math.abs(from);
+  const relative = base.from === 0 ? null : change / Math.abs(base.from);
   if (relative === null) {
     return { value: change, text: `${change > 0 ? '+' : '-'}${fmt.number(Math.abs(change))}`, higherIsBetter };
   }
@@ -37,9 +47,9 @@ export function pointDelta(
   fmt: Formatters,
   higherIsBetter = true,
 ): DeltaText | undefined {
-  if (from === null || from === undefined || to === null || to === undefined) return undefined;
-  const change = to - from;
-  if (Math.abs(change) < 1e-9) return { value: 0, text: 'no change', higherIsBetter };
+  const base = deltaBase(from, to);
+  if (!base || 'empty' in base) return base ? { value: 0, text: 'no change', higherIsBetter } : undefined;
+  const change = base.change;
   return {
     value: change,
     text: `${change > 0 ? '+' : '-'}${fmt.number(Math.abs(change), 1)}pp`,

@@ -5,7 +5,6 @@ import { activeLevers, leverValue, visibleLevers } from '../../engine/whatIf';
 import { pointDelta, relativeDelta, type DeltaText } from '../../lib/delta';
 import { formatFieldValue } from '../../lib/field-format';
 import { useModel } from '../../state/store';
-import { Button } from '../ui/Button';
 import { InlineNote, Panel } from '../ui/Panel';
 import { DeltaPill } from '../ui/Pill';
 import { Slider } from '../ui/Slider';
@@ -130,7 +129,7 @@ function buildRows(committed: Derived, next: Derived, fmt: Formatters): ImpactRo
  * model, so what you see here is exactly what you would get if you applied it.
  */
 export function ExplorePanel() {
-  const { model, levers, setLever, resetLevers, preview, applyPreview, derived, fmt } = useModel();
+  const { model, levers, setLever, preview, derived, fmt } = useModel();
 
   const allLevers = visibleLevers(model);
   const active = activeLevers(model, levers);
@@ -141,18 +140,11 @@ export function ExplorePanel() {
       title="Explore a what-if"
       description="Move a lever and the whole dashboard shows the hypothetical next to your model. Nothing is saved until you apply it."
       actions={
-        preview ? (
-          <>
-            <Button size="sm" variant="primary" onClick={applyPreview}>
-              Apply
-            </Button>
-            <Button size="sm" onClick={resetLevers}>
-              Discard
-            </Button>
-          </>
-        ) : (
-          <span className="text-xs text-subtle">{allLevers.length} levers</span>
-        )
+        <span className="text-xs text-subtle">
+          {active.length > 0
+            ? `${active.length} changed — apply or discard above`
+            : `${allLevers.length} controls`}
+        </span>
       }
     >
       <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">

@@ -80,8 +80,8 @@ export function FunnelChart({ stages, ariaLabel }: { stages: FunnelStage[]; aria
         );
       })}
       <p className="pt-2 text-xs text-subtle">
-        Bar widths are logarithmic — this funnel is far too wide to draw to scale. Hover a stage for the
-        drop-off.
+        Bar widths are logarithmic — this funnel is far too wide to draw to scale. Drop-off is shown
+        under each stage.
       </p>
     </div>
   );

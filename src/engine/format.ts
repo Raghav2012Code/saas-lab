@@ -62,11 +62,11 @@ export function createFormatters(code: CurrencyCode): Formatters {
     maximumFractionDigits: 1,
   });
 
-  // Cache Intl.NumberFormat instances with options as key to prevent repeated
+  // Cache Intl.NumberFormat instances to prevent repeated
   // initialization overhead during table/chart rendering (which formats 500+ numbers per view).
   const intlFormatCache = new Map<string, Intl.NumberFormat>();
   function getNumberFormatter(options: Intl.NumberFormatOptions): Intl.NumberFormat {
-    const key = JSON.stringify(options);
+    const key = `${options.style ?? ''}|${options.currency ?? ''}|${options.currencyDisplay ?? ''}|${options.notation ?? ''}|${options.minimumFractionDigits ?? ''}|${options.maximumFractionDigits ?? ''}`;
     let formatter = intlFormatCache.get(key);
     if (!formatter) {
       formatter = new Intl.NumberFormat(currency.locale, options);

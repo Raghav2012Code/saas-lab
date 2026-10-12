@@ -26,11 +26,6 @@ export function useLayoutMetrics(): void {
 
     measure();
 
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', measure);
-      return () => window.removeEventListener('resize', measure);
-    }
-
     const observer = new ResizeObserver(measure);
     if (header) observer.observe(header);
     if (bar) observer.observe(bar);

@@ -103,13 +103,12 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
         <div className="flex min-w-0 items-center gap-1">
           <label
             htmlFor={inputId}
-            className="scrub field-label truncate"
-            title={`Drag to change, or type a value. Double-click to restore the default (${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}).`}
+            className="scrub field-label truncate underline decoration-dotted underline-offset-4"
+            title={`Drag to change, or type a value. Default is ${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}.`}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={endScrub}
             onPointerCancel={endScrub}
-            onDoubleClick={() => onCommit(DEFAULT_MODEL[spec.key])}
           >
             {spec.label}
           </label>
@@ -129,7 +128,7 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
             <span className="block font-medium text-fg-strong">{spec.hint}</span>
             <span className="mt-1 block text-muted">{spec.detail}</span>
             <span className="mt-1 block text-muted">
-              Drag the label to scrub, double-click it to restore the default, or type a value and use the
+              Drag the label to scrub, or type a value and use the
               arrow keys.
             </span>
           </InfoTip>

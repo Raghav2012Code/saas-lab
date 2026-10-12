@@ -193,6 +193,8 @@ export function ScenariosTab() {
                 const best = comparable.length > 0 ? Math.max(...comparable) : null;
                 const worst = comparable.length > 0 ? Math.min(...comparable) : null;
                 const spread = best !== null && worst !== null && best !== worst;
+                // ponytail: numeric extremes only; lower-is-better rows flip emphasis.
+                const lowerIsBetter = row.id === 'churn' || row.id === 'payback' || row.id === 'breakEven';
                 return (
                   <tr key={row.id} onPointerEnter={() => setHoveredRow(row.id)} onPointerLeave={() => setHoveredRow(null)}>
                     <th scope="row" className={cx(hoveredRow === row.id && 'row-active')}>
@@ -204,6 +206,8 @@ export function ScenariosTab() {
                       const number = numeric[index];
                       const isHigh = spread && number !== null && number === best;
                       const isLow = spread && number !== null && number === worst;
+                      const isGood = lowerIsBetter ? isLow : isHigh;
+                      const isBad = lowerIsBetter ? isHigh : isLow;
                       return (
                         <td
                           key={scenario.id}
@@ -211,7 +215,7 @@ export function ScenariosTab() {
                             'num',
                             hoveredColumn === scenario.id && 'col-active',
                             hoveredRow === row.id && 'row-active',
-                            isHigh ? 'text-fg-strong' : isLow ? 'text-subtle' : '',
+                            isGood ? 'text-fg-strong' : isBad ? 'text-subtle' : '',
                           )}
                         >
                           {value}

@@ -14,12 +14,6 @@ export function useMeasure<T extends HTMLElement>(): [RefObject<T | null>, numbe
 
     setWidth(element.clientWidth);
 
-    if (typeof ResizeObserver === 'undefined') {
-      const onResize = () => setWidth(element.clientWidth);
-      window.addEventListener('resize', onResize);
-      return () => window.removeEventListener('resize', onResize);
-    }
-
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) setWidth(entry.contentRect.width);

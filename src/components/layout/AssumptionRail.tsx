@@ -5,6 +5,7 @@ import type { AcquisitionMode, CacMode } from '../../engine/types';
 import { visibleFields } from '../../engine/validate';
 import { useModel } from '../../state/store';
 import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { InfoTip } from '../ui/InfoTip';
 import { NumberField } from '../ui/NumberField';
 import { Segmented } from '../ui/Segmented';
@@ -104,8 +105,9 @@ export function AssumptionRail({
               {entry.group}
               <span className="h-px flex-1 bg-line" />
               {entry.specs.some((spec) => warningFields.has(spec.key)) ? (
-                <span className="text-accent-fg" title="One of these assumptions looks unusual">
-                  check
+                <span className="inline-flex items-center text-accent-fg" title="One of these assumptions looks unusual">
+                  <Icon name="warning" size={12} />
+                  <span className="sr-only">One of these assumptions looks unusual</span>
                 </span>
               ) : null}
             </h3>

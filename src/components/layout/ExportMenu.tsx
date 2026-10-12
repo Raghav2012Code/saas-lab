@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { assumptionsCsv, copyText, downloadFile, modelJson, projectionCsv } from '../../engine/export';
+import { ASSUMPTION_COLUMNS, copyText, downloadFile, projectionCsv, toCsv } from '../../engine/export';
 import { buildShareUrl } from '../../engine/share';
 import { assumptionRows, buildModelExport } from '../../lib/export-model';
 import { useModel } from '../../state/store';
@@ -118,7 +118,10 @@ export function ExportMenu() {
       run: () => {
         downloadFile(
           `saas-assumptions-${stamp}.csv`,
-          assumptionsCsv(model, assumptionRows(model, fmt)),
+          toCsv(
+            ASSUMPTION_COLUMNS,
+            assumptionRows(model, fmt).map((row) => ({ assumption: row.label, value: row.value })),
+          ),
           'text/csv',
         );
         notify('Assumptions CSV downloaded');
@@ -131,7 +134,7 @@ export function ExportMenu() {
       run: () => {
         downloadFile(
           `saas-model-${stamp}.json`,
-          modelJson(buildModelExport(model, derived, fmt)),
+          JSON.stringify(buildModelExport(model, derived, fmt), null, 2),
           'application/json',
         );
         notify('Model JSON downloaded');

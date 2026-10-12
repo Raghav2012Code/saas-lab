@@ -70,17 +70,10 @@ export function projectionCsv(points: MonthPoint[]): string {
   return toCsv(PROJECTION_COLUMNS, rows);
 }
 
-const ASSUMPTION_COLUMNS: CsvColumn[] = [
+export const ASSUMPTION_COLUMNS: CsvColumn[] = [
   { key: 'assumption', label: 'Assumption' },
   { key: 'value', label: 'Value' },
 ];
-
-export function assumptionsCsv(model: Model, specRows: { label: string; value: string }[]): string {
-  return toCsv(
-    ASSUMPTION_COLUMNS,
-    specRows.map((row) => ({ assumption: row.label, value: row.value })),
-  );
-}
 
 export interface ModelExport {
   version: number;
@@ -88,10 +81,6 @@ export interface ModelExport {
   currency: string;
   model: Model;
   summary: Record<string, string | number | null>;
-}
-
-export function modelJson(payload: ModelExport): string {
-  return JSON.stringify(payload, null, 2);
 }
 
 export function downloadFile(filename: string, content: string, mime: string): void {
@@ -106,28 +95,11 @@ export function downloadFile(filename: string, content: string, mime: string): v
   URL.revokeObjectURL(url);
 }
 
-/** Clipboard with a fallback for browsers that block the async API. */
+/** Clipboard via the async API; false when unavailable or blocked. */
 export async function copyText(text: string): Promise<boolean> {
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch {
-    // fall through to the legacy path
-  }
-
-  try {
-    const area = document.createElement('textarea');
-    area.value = text;
-    area.setAttribute('readonly', '');
-    area.style.position = 'fixed';
-    area.style.opacity = '0';
-    document.body.appendChild(area);
-    area.select();
-    const ok = document.execCommand('copy');
-    area.remove();
-    return ok;
+    await navigator.clipboard.writeText(text);
+    return true;
   } catch {
     return false;
   }
