@@ -71,7 +71,7 @@ export function ScenariosTab() {
     {
       id: 'netNew',
       label: 'Net new MRR, final month',
-      detail: 'New plus expansion, less churned MRR in the last projected month.',
+      detail: 'New plus expansion, minus churned MRR, in the last projected month.',
       value: (result, endIndex) => fmt.money(result.simulation.points[endIndex]?.netNewMrr ?? 0),
     },
     {
@@ -87,7 +87,7 @@ export function ScenariosTab() {
     {
       id: 'nrr',
       label: 'Net revenue retention',
-      detail: 'Expansion versus churn on the existing base, in the final month.',
+      detail: 'Extra revenue from existing customers weighed against cancellations, in the final month.',
       value: (result, endIndex) => {
         const point = result.simulation.points[endIndex];
         const retention = point?.netRetention;
@@ -131,7 +131,7 @@ export function ScenariosTab() {
     {
       id: 'runway',
       label: 'Runway',
-      detail: 'Months until cash reaches zero at the projected burn.',
+      detail: 'Months until cash reaches zero at the projected spending.',
       value: (result) =>
         result.derived.health.profitableNow
           ? 'Profitable'
@@ -140,7 +140,7 @@ export function ScenariosTab() {
     {
       id: 'breakEven',
       label: 'Break-even reached',
-      detail: 'The month net cash flow first turns positive.',
+      detail: 'The month more cash starts coming in than going out.',
       value: (result) => present(result.derived.health.monthsToBreakEven, (value) => `Month ${value}`).display,
     },
   ];
@@ -162,13 +162,13 @@ export function ScenariosTab() {
       <SectionHeading
 
         title="How the same model behaves under different assumptions"
-        description="Conservative and aggressive are stated multipliers, not a second model. Neither is a recommendation — the point is to see which assumptions actually move the outcome."
+        description="Conservative and aggressive multiply your numbers by fixed amounts — they are not a second model. Neither is a recommendation — the point is to see which assumptions actually move the outcome."
         actions={<HorizonControl label="Projection length for scenarios" />}
       />
 
       <Panel
         title={`Comparison at month ${horizon}`}
-        description="Your assumptions, then the same model with acquisition and retention shifted."
+        description="Your assumptions, then the same model with new customers and churn shifted."
         flush
       >
         <div className="overflow-x-auto">
@@ -246,7 +246,7 @@ export function ScenariosTab() {
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title="MRR by scenario" description="The same compounding, three ways.">
+        <Panel title="MRR by scenario" description="The same growth carried forward, three ways.">
           <LineChart
             series={seriesFor('mrr')}
             labels={labels}
@@ -340,7 +340,7 @@ export function ScenariosTab() {
 
       <p className="text-xs text-muted">
         Presets are applied to your base model every time it changes, so they always describe the same
-        relative shift. Base MRR today is {fmt.money(base?.derived.today.mrr ?? 0)} (
+        change relative to your model. Base MRR today is {fmt.money(base?.derived.today.mrr ?? 0)} (
         {fmt.money(base?.derived.today.arr ?? 0)} ARR), driven by {describeAcquisition(model)}.
       </p>
     </div>

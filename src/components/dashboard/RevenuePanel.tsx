@@ -55,7 +55,7 @@ export function RevenuePanel() {
             <Abbr term="MRR" full="Monthly recurring revenue" />, month by month
           </>
         }
-        description="Fixed assumptions compound: growth slows as churn catches up with acquisition."
+        description="The same settings carried forward each month: growth slows as leaving customers catch up with new ones."
         actions={<HorizonControl label="Projection length for revenue" />}
       >
         <LineChart
@@ -99,7 +99,7 @@ export function RevenuePanel() {
             label="ARR"
             value={fmt.money(today.arr)}
             note="today"
-            detail="MRR × 12. A run-rate, not a forecast of booked revenue."
+            detail="MRR × 12. What a full year looks like at today’s pace — not booked revenue."
           />
         </div>
 

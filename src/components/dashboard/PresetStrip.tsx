@@ -35,7 +35,7 @@ export function PresetStrip() {
   return (
     <Panel
       title="Start from a preset"
-      description="Three starting points with live figures from your projection length. Preview to inspect, adopt to make one yours — undoable."
+      description="Three starting points with live figures from your projection length. Preview to inspect, adopt to make one yours — you can undo it."
     >
       <ul className="grid gap-4 md:grid-cols-3">
         {PRESETS.map((preset) => {

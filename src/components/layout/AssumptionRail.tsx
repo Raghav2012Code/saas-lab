@@ -4,6 +4,7 @@ import { FIELD_GROUPS } from '../../engine/constants';
 import type { AcquisitionMode, CacMode } from '../../engine/types';
 import { visibleFields } from '../../engine/validate';
 import { useModel } from '../../state/store';
+import { Abbr } from '../ui/Abbr';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { InfoTip } from '../ui/InfoTip';
@@ -13,7 +14,7 @@ import { Segmented } from '../ui/Segmented';
 const ACQUISITION_OPTIONS: { value: AcquisitionMode; label: string; title: string }[] = [
   { value: 'funnel', label: 'Funnel', title: 'Visitors × visitor→signup × signup→paid' },
   { value: 'direct', label: 'Flat', title: 'A flat number of new customers each month' },
-  { value: 'growth', label: 'Target', title: 'Solved backwards from a target MRR growth rate' },
+  { value: 'growth', label: 'Target', title: 'Worked out backwards from a target MRR growth rate' },
 ];
 
 const CAC_OPTIONS: { value: CacMode; label: string; title: string }[] = [
@@ -49,7 +50,7 @@ export function AssumptionRail({
       <header className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
         <div>
           <h2 className="label-xs">Your assumptions</h2>
-          <p className="mt-0.5 text-xs text-muted">Every edit recalculates MRR, customers, cash and runway instantly.</p>
+          <p className="mt-0.5 text-xs text-muted">Every edit recalculates <Abbr term="MRR" full="Monthly recurring revenue" />, customers, cash and runway instantly.</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <InfoTip label="Assumptions">
@@ -68,8 +69,8 @@ export function AssumptionRail({
           <span className="flex items-center gap-1 text-xs font-medium text-muted">
             How new customers are calculated
             <InfoTip label="How new customers are calculated">
-              All three modes feed the same engine, so churn, LTV, runway and the projections stay
-              comparable whichever you pick.
+              All three settings use the same calculation, so churn, <Abbr term="LTV" full="Lifetime value" />,
+              runway and the projections stay comparable whichever you pick.
             </InfoTip>
           </span>
           <Segmented
@@ -84,8 +85,8 @@ export function AssumptionRail({
           <span className="flex items-center gap-1 text-xs font-medium text-muted">
             How CAC is calculated
             <InfoTip label="How CAC is calculated">
-              CAC = customer acquisition cost. With a budget, CAC is monthly sales &amp; marketing divided by month-1 new customers, then held
-              constant — spend follows acquisition rather than staying flat.
+              CAC means customer acquisition cost. With a budget, CAC is monthly sales &amp; marketing divided by last month’s new customers, then held
+              fixed — spending follows new customers rather than staying flat.
             </InfoTip>
           </span>
           <Segmented

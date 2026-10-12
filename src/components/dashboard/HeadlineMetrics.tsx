@@ -58,7 +58,7 @@ export function HeadlineMetrics() {
             <>
               <span className="block font-medium text-fg-strong">Monthly recurring revenue today</span>
               <span className="mt-1 block text-muted">
-                Customers × blended revenue per customer. Badges compare your saved model
+                Customers × average revenue per customer. Labels compare your saved model
                 against benchmarks; ghost values show the what-if.
               </span>
             </>

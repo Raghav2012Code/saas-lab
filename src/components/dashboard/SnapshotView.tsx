@@ -115,7 +115,7 @@ export function SnapshotView({ onClose }: { onClose: () => void }) {
 
         <Panel
           title="MRR projection"
-          description="Fixed assumptions compound: growth slows as churn catches up with acquisition."
+          description="The same settings carried forward each month: growth slows as leaving customers catch up with new ones."
         >
           <LineChart
             series={series}

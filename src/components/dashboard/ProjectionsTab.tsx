@@ -67,7 +67,7 @@ export function ProjectionsTab() {
       <SectionHeading
 
         title={`The next ${horizon} months`}
-        description="Straight-line compounding of the assumptions you entered. No smoothing, no best case."
+        description="Your assumptions carried forward month by month. No smoothing, no best case."
         actions={<HorizonControl label="Projection length for projections" />}
       />
 
@@ -135,7 +135,7 @@ export function ProjectionsTab() {
           />
         </Panel>
 
-        <Panel title="Customers" description="New customers minus churn, every month.">
+        <Panel title="Customers" description="New customers minus those who leave, every month.">
           <LineChart
             series={overlays('customers', points.map((point) => point.customers)).map((seriesItem) => ({
               ...seriesItem,

@@ -70,7 +70,7 @@ export function FinancialHealthPanel() {
           />
         </Panel>
 
-        <Panel title="Net cash flow" description="Gross profit less sales & marketing and operating expenses.">
+        <Panel title="Net cash flow" description="Gross profit minus sales & marketing and operating expenses.">
           <BarChart
             series={[{ id: 'net', label: 'Net cash flow', color: 'var(--series-1)', values: netCashFlow }]}
             labels={labels.slice(1)}
@@ -103,7 +103,7 @@ export function FinancialHealthPanel() {
             <StatRow
               label="Net burn"
               value={`${fmt.money(health.netBurn)}/mo`}
-              detail="Burn is zero when cash flow covers costs; negative burn means cash is growing."
+              detail="Zero when incoming cash covers costs; when more comes in than goes out, cash grows."
             />
             <StatRow
               label="Runway"
@@ -115,7 +115,7 @@ export function FinancialHealthPanel() {
                     : present(health.runwayMonths, (value) => fmt.months(value)).display
               }
               tone={health.netCashFlow >= 0 ? 'good' : 'default'}
-              detail={health.runwayMonths.reason ?? 'Interpolated months until the projected cash balance reaches zero.'}
+              detail={health.runwayMonths.reason ?? 'Months until the projected cash balance reaches zero, counting partial months.'}
             />
             <StatRow
               label="Cash runs out"
@@ -133,7 +133,7 @@ export function FinancialHealthPanel() {
                   ? 'Not reached'
                   : `Month ${health.monthsToBreakEven.value}`
               }
-              detail={health.monthsToBreakEven.reason ?? 'The first month net cash flow turns positive.'}
+              detail={health.monthsToBreakEven.reason ?? 'The first month more cash comes in than goes out.'}
             />
             <StatRow
               label="Break-even MRR"
@@ -141,8 +141,8 @@ export function FinancialHealthPanel() {
               detail={
                 health.breakEvenMrr.reason ?? (
                   <>
-                    Steady-state <Abbr term="MRR" full="Monthly recurring revenue" /> where net cash flow reaches
-                    zero, assuming acquisition at replacement rate and no expansion.
+                    The <Abbr term="MRR" full="Monthly recurring revenue" /> where incoming and outgoing cash balance
+                    out, assuming new customers only replace those who leave and existing customers don’t spend more.
                   </>
                 )
               }

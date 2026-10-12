@@ -5,8 +5,8 @@ import { InfoTip } from '../ui/InfoTip';
 import { useModel } from '../../state/store';
 
 const MODE_NOTE: Record<string, string> = {
-  direct: 'New customers are entered as a flat number each month. The funnel is not used in Flat/Target mode. Change it under Assumptions → How new customers are calculated.',
-  growth: 'New customers are calculated from a target MRR growth rate, so they are a result rather than an input. The funnel is not used in Flat/Target mode. Change it under Assumptions → How new customers are calculated.',
+  direct: 'New customers are entered as a flat number each month. The funnel is not used with this setting. Change it under Assumptions → How new customers are calculated.',
+  growth: 'New customers are worked out from a target MRR growth rate, so they are a result rather than an input. The funnel is not used with this setting. Change it under Assumptions → How new customers are calculated.',
 };
 
 /** How customers arrive, and how well they stay. */
@@ -70,7 +70,7 @@ export function GrowthPanel() {
                   breakdown.paid > 0 ? model.monthlyVisitors / breakdown.paid : 0,
                   1,
                 )}
-                detail="How much traffic one customer costs. A lower cost per customer is better."
+                detail="How many visitors it takes to win one customer. Fewer is better."
               />
               <StatRow
                 label="Cost per visitor"
@@ -152,7 +152,7 @@ export function GrowthPanel() {
             detail={
               annualisedRetention === null
                 ? undefined
-                : `Compounds to ${fmt.rate(annualisedRetention)} a year. Above 100% the existing base grows on its own.`
+                : `Works out to ${fmt.rate(annualisedRetention)} over a year. Above 100% the customers you already have bring in more on their own.`
             }
           />
           <StatRow
@@ -162,7 +162,7 @@ export function GrowthPanel() {
             detail={
               live.mrrGrowth === null || live.mrrGrowth <= 0
                 ? undefined
-                : `Sustainable for a year, that would compound to ${fmt.rate((1 + live.mrrGrowth) ** 12 - 1)}.`
+                : `Kept up for a year, that would work out to ${fmt.rate((1 + live.mrrGrowth) ** 12 - 1)}.`
             }
           />
           <StatRow
@@ -174,17 +174,17 @@ export function GrowthPanel() {
 
         <div className="mt-3 flex items-start gap-1.5 border-t border-line pt-3 text-xs text-muted">
           <InfoTip label="Where growth flattens">
-            <span className="block font-medium text-fg-strong">Growth flattens where acquisition meets churn</span>
+            <span className="block font-medium text-fg-strong">Growth levels off where new customers meet churn</span>
             <span className="mt-1 block text-muted">
               {model.monthlyChurnPct > 0
-                ? `At ${fmt.number(live.next.newCustomers, 1)} new customers a month against ${fmt.percent(model.monthlyChurnPct)} churn, customers settle near ${fmt.number(live.next.newCustomers / (model.monthlyChurnPct / 100))}. Adding customers faster than that needs a bigger funnel or better retention.`
-                : 'With zero churn, customers never stop accumulating.'}
+                ? `At ${fmt.number(live.next.newCustomers, 1)} new customers a month against ${fmt.percent(model.monthlyChurnPct)} churn, customers settle near ${fmt.number(live.next.newCustomers / (model.monthlyChurnPct / 100))}. Winning customers faster than that needs more visitors or fewer cancellations.`
+                : 'With zero churn, customers keep adding up and never leave.'}
             </span>
           </InfoTip>
           <span>
             {model.monthlyChurnPct > 0
               ? `Customers settle near ${fmt.number(live.next.newCustomers / (model.monthlyChurnPct / 100))} if nothing else changes.`
-              : 'With zero churn, customers accumulate forever.'}
+              : 'With zero churn, customers keep adding up and never leave.'}
           </span>
         </div>
       </Panel>

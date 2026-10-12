@@ -22,7 +22,7 @@ const COLUMNS: Column[] = [
   {
     key: 'customers',
     label: 'Customers',
-    explain: 'Paying customers at the end of the month: last month’s customers, less churn, plus new.',
+    explain: 'Paying customers at the end of the month: last month’s customers, minus those who left, plus new ones.',
     value: (p, fmt) => fmt.number(p.customers),
   },
   {
@@ -58,13 +58,13 @@ const COLUMNS: Column[] = [
   {
     key: 'expansionMrr',
     label: 'Expansion',
-    explain: 'Extra revenue from existing customers upgrading, as ARPU grows month on month.',
+    explain: 'Extra revenue from existing customers upgrading, as revenue per customer grows month on month.',
     value: (p, fmt) => fmt.money(p.expansionMrr),
   },
   {
     key: 'churnedMrr',
     label: 'Churned MRR',
-    explain: 'Revenue lost to cancellations, valued at this month’s ARPU.',
+    explain: 'Revenue lost to cancellations, valued at this month’s revenue per customer.',
     value: (p, fmt) => `-${fmt.money(p.churnedMrr)}`,
     tone: () => 'bad',
   },
@@ -84,7 +84,7 @@ const COLUMNS: Column[] = [
   {
     key: 'grossProfit',
     label: 'Gross profit',
-    explain: 'Revenue × gross margin. What is left to fund acquisition and operations.',
+    explain: 'Revenue × gross margin. What is left to win new customers and run the business.',
     value: (p, fmt) => fmt.money(p.grossProfit),
   },
   {
@@ -102,14 +102,14 @@ const COLUMNS: Column[] = [
   {
     key: 'opex',
     label: 'Operating costs',
-    explain: 'Research and admin costs (R&D, G&A). Excludes cost of revenue and sales & marketing so nothing is double counted.',
+    explain: 'Research and admin costs. Excludes cost of revenue and sales & marketing so nothing is counted twice.',
     value: (p, fmt) => `-${fmt.money(p.opex)}`,
     tone: () => 'muted',
   },
   {
     key: 'netCashFlow',
     label: 'Net cash flow',
-    explain: 'Gross profit less sales & marketing and operating expenses.',
+    explain: 'Gross profit minus sales & marketing and operating expenses.',
     value: (p, fmt) =>
       p.netCashFlow >= 0
         ? `+${fmt.money(p.netCashFlow)}`

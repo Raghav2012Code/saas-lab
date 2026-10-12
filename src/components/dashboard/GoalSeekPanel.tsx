@@ -145,6 +145,7 @@ export function GoalSeekPanel() {
               type="radio"
               name="goalseek-goal"
               value="breakeven-by"
+              className="size-4"
               checked={goalType === 'breakeven-by'}
               onChange={() => {
                 setGoalType('breakeven-by');
@@ -160,6 +161,7 @@ export function GoalSeekPanel() {
               type="radio"
               name="goalseek-goal"
               value="runway-floor"
+              className="size-4"
               checked={goalType === 'runway-floor'}
               onChange={() => {
                 setGoalType('runway-floor');

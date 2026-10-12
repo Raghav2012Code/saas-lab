@@ -15,14 +15,14 @@ export const METRIC_DOCS: MetricDoc[] = [
     id: 'mrr',
     name: 'MRR',
     formula: 'customers × ARPU',
-    note: 'ARPU is the blended monthly revenue per paying customer, so MRR needs no separate plan mix.',
+    note: 'ARPU is the average monthly revenue per paying customer, so MRR needs no separate per-plan breakdown.',
   },
   { id: 'arr', name: 'ARR', formula: 'MRR × 12' },
   {
     id: 'new-mrr',
     name: 'New MRR',
     formula: 'new customers × this month’s ARPU',
-    note: 'Valued at the current period’s ARPU, which is what makes the bridge below reconcile exactly.',
+    note: 'Valued at this month’s revenue per customer, which is what makes the figures below add up exactly.',
   },
   {
     id: 'expansion-mrr',
@@ -40,7 +40,7 @@ export const METRIC_DOCS: MetricDoc[] = [
     id: 'net-new-mrr',
     name: 'Net new MRR',
     formula: 'new MRR + expansion MRR − churned MRR',
-    note: 'By construction this equals the change in MRR month over month, so the bridge always ties out.',
+    note: 'This always equals the change in MRR month over month, so the figures always add up.',
   },
   {
     id: 'mrr-growth',
@@ -51,25 +51,25 @@ export const METRIC_DOCS: MetricDoc[] = [
     id: 'arpu',
     name: 'ARPU',
     formula: 'a single input: blended revenue per customer per month',
-    note: 'Today’s MRR is customers × ARPU. It then compounds monthly at the expansion rate.',
+    note: 'Today’s MRR is customers × ARPU. It then grows monthly at the expansion rate.',
   },
   {
     id: 'cac',
     name: 'CAC',
     formula: 'monthly sales & marketing spend ÷ new customers in month 1',
-    note: 'Held constant across the projection, so spend rises and falls with acquisition volume instead of staying flat. You can also enter CAC directly.',
+    note: 'Held fixed across the projection, so spending rises and falls with the number of new customers instead of staying flat. You can also enter CAC directly.',
   },
   {
     id: 'ltv',
     name: 'LTV',
     formula: 'ARPU × gross margin ÷ monthly churn',
-    note: 'Cumulative gross profit over an average lifetime of 1 ÷ churn months. Expansion is deliberately excluded to keep it conservative — net revenue retention covers expansion instead.',
+    note: 'Total gross profit added up over an average lifetime of 1 ÷ churn months. Extra revenue from existing customers is left out to keep it cautious — net revenue retention covers that instead.',
   },
   {
     id: 'ltv-cac',
     name: 'LTV : CAC',
     formula: 'LTV ÷ CAC',
-    note: 'Undefined when CAC is zero or churn is zero, because the ratio genuinely has no answer then.',
+    note: 'Not shown when CAC is zero or churn is zero, because the ratio genuinely has no answer then.',
   },
   {
     id: 'payback',
@@ -93,25 +93,25 @@ export const METRIC_DOCS: MetricDoc[] = [
     id: 'net-burn',
     name: 'Net burn',
     formula: 'max(0, −net cash flow)',
-    note: 'Zero when the business is cash-flow positive.',
+    note: 'Zero when the business brings in more cash than it spends.',
   },
   {
     id: 'runway',
     name: 'Runway',
     formula: 'interpolated months until the projected cash balance reaches zero',
-    note: 'Not cash ÷ a fixed burn: it uses the whole projection, so revenue growth correctly extends runway. Reported as “not applicable” when cash flow is not negative.',
+    note: 'Not cash divided by one fixed spending figure: it uses the whole projection, so revenue growth correctly extends runway. Reported as “not applicable” when cash flow is not negative.',
   },
   {
     id: 'break-even',
     name: 'Break-even MRR',
     formula: 'operating expenses ÷ (gross margin − churn × CAC ÷ ARPU)',
-    note: 'The steady-state MRR where net cash flow reaches zero, assuming acquisition at exactly replacement rate and no expansion. If that denominator is negative, break-even is unreachable at any scale and the app says so instead of inventing a number.',
+    note: 'The monthly revenue where incoming and outgoing cash balance out, if new customers only replace those who leave and existing customers don’t spend more. If costs swallow the profit at every size, break-even can’t be reached no matter how big the business gets, and the app says so instead of inventing a number.',
   },
   {
     id: 'nrr',
     name: 'Net revenue retention',
     formula: '(opening MRR + expansion MRR − churned MRR) ÷ opening MRR',
-    note: 'A single-cohort approximation on a monthly basis: it isolates expansion against churn and excludes new customers. At or above 100% the existing base grows on its own.',
+    note: 'How the revenue from customers you already had changes in a month: extra spending minus cancellations, ignoring new customers. At or above 100% that base grows on its own.',
   },
   {
     id: 'retention',
@@ -130,7 +130,7 @@ export const MODEL_NOTES: ModelNote[] = [
   {
     id: 'today-vs-flows',
     title: 'Balances are today, flows are the next 30 days',
-    body: 'MRR, ARR, customers and cash are point-in-time balances. New customers, churn, MRR movements and cash flow describe the month ahead. The projection starts from today.',
+    body: 'MRR, ARR, customers and cash are snapshots of right now. New customers, churn, MRR movements and cash flow describe the month ahead. The projection starts from today.',
   },
   {
     id: 'one-model',
@@ -140,27 +140,27 @@ export const MODEL_NOTES: ModelNote[] = [
   {
     id: 'acquisition',
     title: 'Acquisition is held constant',
-    body: 'Whether it comes from the funnel or a flat number, monthly acquisition does not grow on its own. With a fixed funnel, customers plateau where new customers equal churned customers — that is a real outcome of the assumptions, not a ceiling imposed by the app.',
+    body: 'Whether it comes from the funnel or a flat number, monthly acquisition does not grow on its own. With a fixed funnel, customers level off where new customers equal customers who leave — that is a real outcome of the assumptions, not a ceiling imposed by the app.',
   },
   {
     id: 'modes',
     title: 'Three ways to drive growth',
-    body: 'Bottom-up from visitors and conversion rates, a flat number of new customers, or a target MRR growth rate that acquisition is solved backwards from. All three feed the same engine, so churn, LTV and runway behave identically.',
+    body: 'Starting from visitors and conversion rates, a flat number of new customers, or a target MRR growth rate that new customers are worked out backwards from. All three use the same calculation, so churn, lifetime value (LTV) and runway behave identically.',
   },
   {
     id: 'costs',
     title: 'What counts as operating expenses',
-    body: 'Operating expenses cover R&D and G&A only. Cost of revenue is handled by the gross margin, and sales & marketing is derived from CAC × new customers, so no cost is double counted and none is hidden.',
+    body: 'Operating expenses cover R&D and G&A only. Cost of revenue is handled by the gross margin, and sales & marketing is derived from customer acquisition cost (CAC) × new customers, so no cost is double counted and none is hidden.',
   },
   {
     id: 'expansion',
     title: 'Expansion lifts revenue, not headcount',
-    body: 'The expansion rate raises ARPU each month, which raises MRR from the customers you already have. It never creates customers.',
+    body: 'The expansion rate raises revenue per customer (ARPU) each month, which raises MRR from the customers you already have. It never creates customers.',
   },
   {
     id: 'excluded',
     title: 'What this model deliberately leaves out',
-    body: 'Taxes, interest, financing, one-off costs, multi-year contracts, prepaid annual plans, seat-level plan mixes and hiring ladders. Each one adds inputs without changing the shape of the answer, so they are out rather than half-implemented.',
+    body: 'Taxes, interest, financing, one-off costs, multi-year contracts, prepaid annual plans, seat-level plan mixes and hiring ladders. Each one would add inputs without changing what the answer looks like, so they are left out rather than half done.',
   },
   {
     id: 'privacy',

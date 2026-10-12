@@ -214,7 +214,7 @@ describe('edge cases', () => {
   it('reports LTV as not applicable at zero churn instead of Infinity', () => {
     const { derived } = analyze({ monthlyChurnPct: 0 });
     expect(derived.unit.ltv.value).toBeNull();
-    expect(derived.unit.ltv.reason).toMatch(/zero churn/i);
+    expect(derived.unit.ltv.reason).toMatch(/no churn/i);
     expect(derived.unit.ltvToCac.value).toBeNull();
     expect(derived.netRetention).toBeCloseTo(1.012, 6);
   });
@@ -245,7 +245,7 @@ describe('edge cases', () => {
     // spend is held flat rather than silently inventing a CAC
     expect(at(simulation, 1).smSpend).toBe(noAcquisition.monthlySmSpend);
     expect(derived.health.breakEvenMrr.value).toBeNull();
-    expect(derived.health.breakEvenMrr.reason).toMatch(/CAC/i);
+    expect(derived.health.breakEvenMrr.reason).toMatch(/acquisition cost/i);
     expect(derived.health.breakEvenCustomers.value).toBeNull();
     expect(derived.unit.paybackMonths.value).toBeNull();
   });

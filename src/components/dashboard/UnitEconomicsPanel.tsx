@@ -102,8 +102,8 @@ export function UnitEconomicsPanel() {
           <span className="block font-medium text-fg-strong">Methodology</span>
           <span className="mt-1 block text-muted">
             <Abbr term="LTV" full="Lifetime value" /> = <Abbr term="ARPU" full="Average revenue per user" />{' '}
-            × gross margin ÷ monthly churn, which is the cumulative gross profit over an average
-            lifetime of 1 ÷ churn months. Expansion is excluded to keep it conservative.
+            × gross margin ÷ monthly churn, which adds up the gross profit over the average
+            customer lifetime (1 ÷ churn months). Extra revenue from existing customers is left out to keep it cautious.
           </span>
         </InfoTip>
       }
@@ -150,7 +150,7 @@ export function UnitEconomicsPanel() {
             value={`${fmt.money(live.unit.arpu)}/mo`}
             detail={
               <>
-                Blended across every plan, and the figure <Abbr term="MRR" full="Monthly recurring revenue" /> is
+                Averaged across every plan, and the per-customer figure <Abbr term="MRR" full="Monthly recurring revenue" /> is
                 built from.
               </>
             }
@@ -158,13 +158,13 @@ export function UnitEconomicsPanel() {
           <StatRow
             label="Gross profit per customer"
             value={`${present(live.unit.grossProfitPerCustomer, (value) => fmt.money(value)).display}/mo`}
-            detail="Revenue per customer × gross margin. This is what repays CAC."
+            detail="Revenue per customer × gross margin. This is what pays back the cost of winning each customer."
           />
           <StatRow
             label="Expected lifetime"
             value={expectedLifetime === null ? '\u2014' : fmt.months(expectedLifetime)}
             note="1 ÷ churn"
-            detail="With zero churn an average lifetime is unbounded, so this is shown as unavailable."
+            detail="With zero churn customers stay forever on average, so there is no lifetime to show."
           />
           <StatRow
             label="Lifetime value"
@@ -179,14 +179,14 @@ export function UnitEconomicsPanel() {
             detail={
               live.netRetention === null
                 ? 'No opening MRR to compare against yet.'
-                : `Annualised, that compounds to ${fmt.rate((1 + live.netRetention) ** 12 - 1)}. It isolates expansion against churn and excludes new customers.`
+                : `Over a full year, that works out to ${fmt.rate((1 + live.netRetention) ** 12 - 1)}. It weighs extra spending against cancellations and leaves out new customers.`
             }
           />
           <StatRow
             label="Customers churning"
             value={`${fmt.number(live.next.churnedCustomers, 1)}/mo`}
             note={`of ${fmt.number(live.today.customers)}`}
-            detail="Logo churn applied to last month's customer count."
+            detail="Customers who cancelled, counted from last month's customer base."
           />
         </div>
       </div>

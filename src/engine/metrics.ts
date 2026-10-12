@@ -30,7 +30,7 @@ export function lifetimeValue(arpu: number, grossMarginPct: number, churnPct: nu
 
   if (!(arpu > 0)) return metric(null, 'Revenue per customer is zero, so there is no lifetime value to recover.');
   if (!(margin > 0)) return metric(null, 'At 0% gross margin there is no gross profit to accumulate.');
-  if (!(churn > 0)) return metric(null, 'Zero churn means an average lifetime of forever, so LTV is unbounded.');
+  if (!(churn > 0)) return metric(null, 'No churn means customers stay forever on average, so lifetime value has no end to add up to.');
   return metric((arpu * margin) / churn);
 }
 
@@ -38,7 +38,7 @@ export function lifetimeValue(arpu: number, grossMarginPct: number, churnPct: nu
 export function cacPayback(cac: Metric, arpu: number, grossMarginPct: number): Metric {
   const margin = clamp(grossMarginPct / 100, 0, 1);
   const grossProfitPerCustomer = arpu * margin;
-  if (cac.value === null) return metric(null, cac.reason ?? 'CAC is unknown.');
+  if (cac.value === null) return metric(null, cac.reason ?? 'Acquisition cost is unknown, so this can’t be worked out.');
   if (!(grossProfitPerCustomer > 0)) {
     return metric(null, 'Gross profit per customer is zero, so acquisition cost can never be repaid.');
   }
@@ -46,8 +46,8 @@ export function cacPayback(cac: Metric, arpu: number, grossMarginPct: number): M
 }
 
 function ratio(ltv: Metric, cac: Metric): Metric {
-  if (ltv.value === null) return metric(null, ltv.reason ?? 'LTV is unknown.');
-  if (cac.value === null) return metric(null, cac.reason ?? 'CAC is unknown.');
+  if (ltv.value === null) return metric(null, ltv.reason ?? 'Lifetime value is unknown, so this can’t be worked out.');
+  if (cac.value === null) return metric(null, cac.reason ?? 'Acquisition cost is unknown, so this can’t be worked out.');
   if (cac.value === 0) return metric(null, 'Acquisition is free, so there is no ratio to report.');
   return metric(ltv.value / cac.value);
 }
@@ -110,7 +110,7 @@ function healthFor(model: Model, simulation: Simulation): FinancialHealth {
         : 'Operating cash flow is at break-even, so cash is not depleting.',
     );
   } else if (cashOut === null) {
-    runway = metric(null, 'Cash lasts beyond the projection: burn falls as revenue grows.');
+    runway = metric(null, 'Cash lasts beyond the projection: rising revenue covers spending.');
   } else {
     runway = metric(cashOut);
   }
@@ -133,9 +133,9 @@ function healthFor(model: Model, simulation: Simulation): FinancialHealth {
         ? metric(null, breakEven.reason)
         : metric(breakEven.value / Math.max(1e-9, Math.max(0, finite(model.arpu)))),
     monthsToBreakEven: profitableNow
-      ? metric(null, 'Already generating positive net cash flow.')
+      ? metric(null, 'Already bringing in more cash than goes out.')
       : breakEvenMonth === null
-        ? metric(null, 'Not reached within the projection. Costs keep outpacing gross profit.')
+        ? metric(null, 'Not reached within the projection. Costs stay above gross profit.')
         : metric(breakEvenMonth),
     profitableNow,
   };
@@ -155,15 +155,15 @@ export function breakEvenMrr(model: Model, cac: Metric): Metric {
   const churn = clamp(finite(model.monthlyChurnPct) / 100, 0, 1);
   const opex = Math.max(0, finite(model.monthlyOpex));
 
-  if (arpu <= 0) return metric(null, 'Revenue per customer is zero, so no MRR level covers fixed costs.');
-  if (cac.value === null) return metric(null, 'CAC is unknown, so break-even cannot be calculated.');
+  if (arpu <= 0) return metric(null, 'Revenue per customer is zero, so no amount of monthly revenue covers running costs.');
+  if (cac.value === null) return metric(null, 'Acquisition cost is unknown, so break-even cannot be worked out.');
   if (margin <= 0) return metric(null, 'At 0% gross margin, revenue contributes nothing towards costs.');
 
   const contributionPerMrr = margin - (churn * cac.value) / arpu;
   if (contributionPerMrr <= 0) {
     return metric(
       null,
-      'Not reachable — churn and acquisition costs absorb all gross profit at any scale.',
+      'Not reachable — churn and acquisition costs swallow all gross profit, no matter how many customers you add.',
     );
   }
   return metric(opex / contributionPerMrr);
