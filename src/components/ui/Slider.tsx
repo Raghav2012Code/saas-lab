@@ -53,7 +53,6 @@ export function Slider({
               onClick={onReset}
               className="inline-flex h-6 w-6 items-center justify-center text-subtle transition-colors hover:text-fg"
               aria-label={`Reset ${label} to ${baselineDisplay}`}
-              title={`Reset to ${baselineDisplay}`}
             >
               <Icon name="reset" size={13} />
             </button>

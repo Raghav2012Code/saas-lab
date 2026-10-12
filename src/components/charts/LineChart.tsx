@@ -89,7 +89,7 @@ export function LineChart({
   const showingPin = pinned !== null && hovered === null && externalIndex === null;
 
   const visible = series.filter((item) => !hiddenSeries.includes(item.id));
-  const drawable = visible.length > 0 ? visible : series;
+  const drawable = visible;
 
   const geometry = useMemo(() => {
     const [dataMin, dataMax] = valueExtent(drawable.map((item) => item.values), includeZero);
@@ -164,6 +164,20 @@ export function LineChart({
     active !== null
       ? tooltipPlacement(x(active), padding.top + 6, chartWidth, height, 208, 92)
       : null;
+
+  if (visible.length === 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-start justify-between gap-3">
+          <ChartLegend items={series} onToggle={onToggleSeries} hidden={hiddenSeries} />
+          <ChartHint pinned={showingPin} />
+        </div>
+        <p role="status" className="py-8 text-center text-sm text-muted">
+          All series hidden — toggle one back on in the legend.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">

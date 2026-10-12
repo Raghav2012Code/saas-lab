@@ -37,7 +37,7 @@ export function DeltaPill({
   higherIsBetter?: boolean;
 }) {
   if (value === null || !Number.isFinite(value)) {
-    return <Pill tone="neutral">no change</Pill>;
+    return <Pill tone="neutral">No change</Pill>;
   }
 
   const rising = value > 0;
@@ -46,7 +46,7 @@ export function DeltaPill({
 
   return (
     <Pill tone={resolved} icon={flat ? undefined : rising ? 'arrowUp' : 'arrowDown'}>
-      {text}
+      {text === 'no change' ? 'No change' : text}
     </Pill>
   );
 }

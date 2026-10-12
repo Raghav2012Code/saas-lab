@@ -4,11 +4,11 @@ import { useModel } from '../../state/store';
 import { Segmented } from '../ui/Segmented';
 
 /** Projection length. Shared state, so every chart on every tab agrees. */
-export function HorizonControl() {
+export function HorizonControl({ label = 'Projection length' }: { label?: string }) {
   const { horizon, setHorizon } = useModel();
   return (
     <Segmented<`${HorizonMonths}`>
-      label="Projection length"
+      label={label}
       value={`${horizon}`}
       onChange={(value) => setHorizon(Number(value) as HorizonMonths)}
       options={HORIZONS.map((entry) => ({ value: `${entry.months}`, label: entry.label }))}

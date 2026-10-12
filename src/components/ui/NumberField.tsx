@@ -44,6 +44,10 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
 
   // Percent fields already carry their unit inside the input, so no echo.
   const echo = spec.unit === 'percent' ? null : formatFieldValue(spec, value, fmt);
+  const echoId = echo ? `${inputId}-echo` : null;
+  const describedBy =
+    [echoId, error ? `${inputId}-error` : warning ? `${inputId}-note` : null].filter(Boolean).join(' ') ||
+    undefined;
   const rangeShare = spec.max > spec.min ? (value - spec.min) / (spec.max - spec.min) : 0;
 
   const step = (direction: 1 | -1, big: boolean) => {
@@ -104,7 +108,6 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
           <label
             htmlFor={inputId}
             className="scrub field-label truncate underline decoration-dotted underline-offset-4"
-            title={`Drag to change, or type a value. Default is ${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}.`}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={endScrub}
@@ -118,7 +121,6 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
               type="button"
               onClick={() => onCommit(DEFAULT_MODEL[spec.key])}
               aria-label={`Reset ${spec.label} to the default, ${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}`}
-              title={`Changed. Reset to ${formatFieldValue(spec, DEFAULT_MODEL[spec.key], fmt)}`}
               className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-brand transition-colors hover:bg-brand-soft"
             >
               <Icon name="reset" size={12} />
@@ -134,7 +136,7 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
           </InfoTip>
         </div>
         {echo ? (
-          <span className="num shrink-0 text-xs text-subtle" aria-hidden="true">
+          <span id={echoId ?? undefined} className="num shrink-0 text-xs text-subtle">
             {echo}
           </span>
         ) : null}
@@ -158,7 +160,7 @@ export function NumberField({ spec, value, fmt, onCommit, idPrefix }: NumberFiel
           autoComplete="off"
           spellCheck={false}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? `${inputId}-error` : warning ? `${inputId}-note` : undefined}
+          aria-describedby={describedBy}
           value={display}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={(event) => tryCommit(event.target.value)}

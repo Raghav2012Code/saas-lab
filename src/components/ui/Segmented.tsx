@@ -35,7 +35,6 @@ export function Segmented<T extends string>({
           key={option.value}
           type="button"
           aria-pressed={option.value === value}
-          title={option.title}
           className={cx('seg-item', fill && 'flex-1')}
           onClick={() => onChange(option.value)}
         >

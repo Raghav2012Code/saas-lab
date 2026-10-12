@@ -19,6 +19,13 @@ const BENCH_LABEL: Record<BenchmarkBadge['status'], string | null> = {
   na: null,
 };
 
+const BENCH_TONE: Record<BenchmarkBadge['status'], 'good' | 'neutral' | 'warn'> = {
+  good: 'good',
+  ok: 'neutral',
+  weak: 'warn',
+  na: 'neutral',
+};
+
 interface StatTileProps {
   label: string;
   /** the committed value, already formatted */
@@ -104,9 +111,12 @@ export function StatTile({
 
       <div className={`flex min-h-[20px] flex-wrap items-center gap-x-2 gap-y-1 ${hasMeta ? '' : 'hidden'}`}>
         {reason && !previewing ? (
-          <span className="flex items-center gap-1 text-xs text-muted">
+          <span className="flex min-w-0 flex-wrap items-center gap-1 text-xs text-muted">
             <Pill tone="neutral">Not applicable</Pill>
-            <InfoTip label={label}>{reason}</InfoTip>
+            <span className="text-xs text-muted max-w-[180px] truncate" title={reason}>
+              {reason}
+            </span>
+            {reason.length > 80 ? <InfoTip label={label}>{reason}</InfoTip> : null}
           </span>
         ) : null}
 
@@ -137,11 +147,14 @@ export function StatTile({
 
         {!reason && !previewing && !delta && caption ? <span className="text-xs text-muted">{caption}</span> : null}
 
-        {benchLabel ? (
-          <InfoTip label={`${label} benchmark`}>
-            <span className="block font-medium text-fg-strong">{benchLabel}</span>
-            <span className="mt-1 block text-muted">{benchmark?.guidance}</span>
-          </InfoTip>
+        {benchmark && benchLabel ? (
+          <span className="flex items-center gap-1">
+            <Pill tone={BENCH_TONE[benchmark.status]}>{benchLabel}</Pill>
+            <InfoTip label={`${label} benchmark`}>
+              <span className="block font-medium text-fg-strong">{benchLabel}</span>
+              <span className="mt-1 block text-muted">{benchmark.guidance}</span>
+            </InfoTip>
+          </span>
         ) : null}
       </div>
     </div>

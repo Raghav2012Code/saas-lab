@@ -461,7 +461,7 @@ export function ChartHint({ pinned, subject = 'point' }: { pinned: boolean; subj
   return (
     <span className="flex items-center gap-1 text-[11px] text-subtle">
       <Icon name={pinned ? 'pin' : 'cursor'} size={11} />
-      {pinned ? `Click to unpin` : `Hover or click a ${subject}`}
+      {pinned ? `Click to unpin` : `Select a ${subject} for details (tap, click, or arrow keys + Enter)`}
     </span>
   );
 }

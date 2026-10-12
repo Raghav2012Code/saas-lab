@@ -17,15 +17,17 @@ export function Advisories() {
   if (live.advisories.length === 0) return null;
 
   return (
-    <section aria-label="Notes about these assumptions" className="panel divide-y divide-line">
+    <section aria-label="Notes about these assumptions" className="panel">
+      <ul className="divide-y divide-line">
       {live.advisories.map((advisory) => (
-        <div key={advisory.id} className="flex items-start gap-2.5 px-4 py-2.5">
+        <li key={advisory.id} className="flex items-start gap-2.5 px-4 py-2.5">
           <span className={`mt-0.5 ${TONE[advisory.severity] ?? 'text-subtle'}`}>
             <Icon name={advisory.severity === 'info' ? 'info' : 'warning'} size={14} />
           </span>
           <p className="text-sm text-fg">{advisory.title}</p>
-        </div>
+        </li>
       ))}
+      </ul>
     </section>
   );
 }
