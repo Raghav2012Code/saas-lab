@@ -24,7 +24,7 @@ export function PreviewBanner() {
         </span>
 
         <p className="min-w-0 flex-1 text-sm text-accent-fg">
-          {descriptions.length > 0 ? descriptions.join(' · ') : 'Adjust the levers to explore a change.'}
+          {descriptions.length > 0 ? descriptions.join(' · ') : 'Adjust the controls to explore a change.'}
         </p>
 
         <div className="flex items-center gap-2">

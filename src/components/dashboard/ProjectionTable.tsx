@@ -26,7 +26,7 @@ const COLUMNS: Column[] = [
   },
   {
     key: 'newCustomers',
-    label: 'New',
+    label: 'New customers',
     explain: 'Customers acquired during the month.',
     value: (p, fmt) => fmt.number(p.newCustomers, 1),
   },
@@ -65,7 +65,7 @@ const COLUMNS: Column[] = [
   {
     key: 'netNewMrr',
     label: 'Net new',
-    explain: 'New plus expansion, less churned. By construction this equals the change in MRR.',
+    explain: 'New plus expansion, less churned. This always equals the change in MRR.',
     value: (p, fmt) =>
       p.netNewMrr >= 0 ? `+${fmt.money(p.netNewMrr)}` : `-${fmt.money(Math.abs(p.netNewMrr))}`,
     tone: (p) => (p.netNewMrr >= 0 ? 'good' : 'bad'),
@@ -78,15 +78,15 @@ const COLUMNS: Column[] = [
   },
   {
     key: 'smSpend',
-    label: 'S&M',
-    explain: 'Sales & marketing. CAC × new customers, so spend follows acquisition volume.',
+    label: 'Sales & marketing',
+    explain: 'Sales & marketing. Customer acquisition cost (CAC) × new customers, so spend follows acquisition volume.',
     value: (p, fmt) => `-${fmt.money(p.smSpend)}`,
     tone: () => 'muted',
   },
   {
     key: 'opex',
-    label: 'Opex',
-    explain: 'R&D and G&A. Excludes cost of revenue and sales & marketing so nothing is double counted.',
+    label: 'Operating costs',
+    explain: 'Research and admin costs (R&D, G&A). Excludes cost of revenue and sales & marketing so nothing is double counted.',
     value: (p, fmt) => `-${fmt.money(p.opex)}`,
     tone: () => 'muted',
   },

@@ -138,7 +138,7 @@ export function ExplorePanel() {
   return (
     <Panel
       title="Explore a what-if"
-      description="Move a lever and the whole dashboard shows the hypothetical next to your model. Nothing is saved until you apply it."
+      description="Move a control and the whole dashboard shows the hypothetical next to your model. Nothing is saved until you apply it."
       actions={
         <span className="text-xs text-subtle">
           {active.length > 0
@@ -222,7 +222,7 @@ export function ExplorePanel() {
       ) : (
         <div className="mt-5 border-t border-line pt-4">
           <InlineNote>
-            Try “what if churn were 5%?” or “what if I charged 20% more?” — every metric above updates as you
+            Try raising churn to 5% or pricing by 20% — the comparison below updates as you
             drag.
           </InlineNote>
         </div>

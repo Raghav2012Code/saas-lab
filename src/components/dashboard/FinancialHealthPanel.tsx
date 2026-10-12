@@ -49,7 +49,7 @@ export function FinancialHealthPanel() {
         <Panel
           title="Cash balance"
           description="Starting cash plus every month's net cash flow."
-          actions={<HorizonControl />}
+          actions={<HorizonControl label="Projection length for financial health" />}
         >
           <LineChart
             series={cashSeries}
@@ -82,7 +82,7 @@ export function FinancialHealthPanel() {
         </Panel>
       </div>
 
-      <Panel title="This month's P&L" description="Where the money goes, in order.">
+      <Panel title="Monthly profit and loss (P&L)" description="Where the money goes, in order.">
         <div className="grid gap-x-8 gap-y-4 lg:grid-cols-2">
           <div className="divide-y divide-line">
             <StatRow label="Revenue" value={fmt.money(health.revenue)} />
@@ -102,7 +102,7 @@ export function FinancialHealthPanel() {
             <StatRow
               label="Net burn"
               value={`${fmt.money(health.netBurn)}/mo`}
-              detail="Zero when the business is cash-flow positive."
+              detail="Burn is zero when cash flow covers costs; negative burn means cash is growing."
             />
             <StatRow
               label="Runway"

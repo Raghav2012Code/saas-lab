@@ -67,7 +67,7 @@ export function ProjectionsTab() {
 
         title={`The next ${horizon} months`}
         description="Straight-line compounding of the assumptions you entered. No smoothing, no best case."
-        actions={<HorizonControl />}
+        actions={<HorizonControl label="Projection length for projections" />}
       />
 
       <TileGrid>

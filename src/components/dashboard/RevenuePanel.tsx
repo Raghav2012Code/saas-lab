@@ -51,7 +51,7 @@ export function RevenuePanel() {
         className="lg:col-span-3"
         title="MRR, month by month"
         description="Fixed assumptions compound: growth slows as churn catches up with acquisition."
-        actions={<HorizonControl />}
+        actions={<HorizonControl label="Projection length for revenue" />}
       >
         <LineChart
           series={series}
@@ -69,7 +69,7 @@ export function RevenuePanel() {
         <WaterfallChart
           items={[
             { label: 'Now', value: today.mrr, kind: 'start' },
-            { label: 'New', value: next.newMrr, kind: 'delta' },
+            { label: 'New MRR', value: next.newMrr, kind: 'delta' },
             { label: 'Expan.', value: next.expansionMrr, kind: 'delta' },
             { label: 'Churn', value: -next.churnedMrr, kind: 'delta' },
             { label: 'Next', value: next.mrr, kind: 'total' },

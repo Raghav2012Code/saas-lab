@@ -88,7 +88,7 @@ export function ExportMenu() {
     {
       id: 'share',
       label: 'Copy share link',
-      hint: 'Every assumption travels in the link',
+      hint: 'The link contains all your assumptions.',
       run: () => {
         void copyText(buildShareUrl(model)).then((ok) =>
           notify(
@@ -130,7 +130,7 @@ export function ExportMenu() {
     {
       id: 'json',
       label: 'Model JSON',
-      hint: 'The full model, for backups or scripts',
+      hint: 'The full model, for safekeeping or reuse',
       run: () => {
         downloadFile(
           `saas-model-${stamp}.json`,

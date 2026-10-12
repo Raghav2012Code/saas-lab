@@ -14,8 +14,8 @@ export function MethodologyTab() {
     <div className="flex flex-col gap-8 lg:gap-10">
       <SectionHeading
 
-        title="Exactly how every number is calculated"
-        description="SaaS metrics have more than one accepted definition. These are the ones this model uses, stated plainly so you can judge them."
+        title="How every number is calculated"
+        description="SaaS metrics have more than one accepted definition. These are the ones this model uses, stated plainly with their limits."
       />
 
       <Panel
@@ -64,7 +64,7 @@ export function MethodologyTab() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel
           title="Assumptions in force"
-          description="What is currently feeding the model."
+          description="Which inputs the model currently uses."
           flush
         >
           <div className="scroll-area max-h-[30rem] overflow-auto">
@@ -104,7 +104,7 @@ export function MethodologyTab() {
             {Object.entries(BENCH_BANDS).map(([id, band]) => (
               <li key={id} className="flex flex-col gap-1 py-2.5">
                 <span className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-fg">{BENCH_LABELS[id] ?? id}</span>
+                  <span className="text-sm font-medium text-fg">{BENCH_LABELS[id] ?? 'Unknown'}</span>
                   <Pill tone="neutral">
                     {band.lowerIsBetter ? `better under ${band.good}` : `better over ${band.good}`}
                   </Pill>

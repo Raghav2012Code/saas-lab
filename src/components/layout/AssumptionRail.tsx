@@ -49,7 +49,7 @@ export function AssumptionRail({
       <header className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
         <div>
           <h2 className="label-xs">Your assumptions</h2>
-          <p className="mt-0.5 text-xs text-muted">Change anything and the whole model follows.</p>
+          <p className="mt-0.5 text-xs text-muted">Every edit recalculates MRR, customers, cash and runway instantly.</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <InfoTip label="Assumptions">
@@ -66,15 +66,15 @@ export function AssumptionRail({
       <div className="flex flex-col gap-4 border-b border-line px-4 py-3">
         <div className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1 text-xs font-medium text-muted">
-            New customers from
-            <InfoTip label="New customers from">
+            How new customers are calculated
+            <InfoTip label="How new customers are calculated">
               All three modes feed the same engine, so churn, LTV, runway and the projections stay
               comparable whichever you pick.
             </InfoTip>
           </span>
           <Segmented
             fill
-            label="How new customers are determined"
+            label="How new customers are calculated"
             value={model.acquisitionMode}
             onChange={(value) => update({ acquisitionMode: value })}
             options={ACQUISITION_OPTIONS}
@@ -82,15 +82,15 @@ export function AssumptionRail({
         </div>
         <div className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1 text-xs font-medium text-muted">
-            CAC from
-            <InfoTip label="CAC from">
-              With a budget, CAC is monthly sales &amp; marketing divided by month-1 new customers, then held
+            How CAC is calculated
+            <InfoTip label="How CAC is calculated">
+              CAC = customer acquisition cost. With a budget, CAC is monthly sales &amp; marketing divided by month-1 new customers, then held
               constant — spend follows acquisition rather than staying flat.
             </InfoTip>
           </span>
           <Segmented
             fill
-            label="How CAC is determined"
+            label="How CAC is calculated"
             value={model.cacMode}
             onChange={(value) => update({ cacMode: value })}
             options={CAC_OPTIONS}
@@ -126,7 +126,7 @@ export function AssumptionRail({
       </div>
 
       <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
-        <p className="text-xs text-muted">{isDefault ? 'Using the defaults' : 'Saved in this browser'}</p>
+        <p className="text-xs text-muted">{isDefault ? 'Default assumptions' : 'Saved in this browser on this device'}</p>
         <Button size="sm" variant="quiet" onClick={reset} title="Reset every assumption to its default">
           Reset
         </Button>

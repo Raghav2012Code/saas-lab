@@ -1,7 +1,7 @@
 import { CURRENCIES, CURRENCY_ORDER } from '../../engine/currency';
 import type { CurrencyCode } from '../../engine/types';
 import { useModel } from '../../state/store';
-import { resolveDark, themeLabel, useTheme, type ThemeMode } from '../../state/theme';
+import { themeLabel, useTheme, type ThemeMode } from '../../state/theme';
 import { Segmented } from '../ui/Segmented';
 import { Select } from '../ui/Select';
 import { Button, IconButton } from '../ui/Button';
@@ -45,7 +45,6 @@ export function TopBar() {
   const { mode, cycle } = useTheme();
 
   const themeIcon = mode === 'light' ? 'sun' : mode === 'dark' ? 'moon' : 'monitor';
-  const resolved = resolveDark(mode) ? 'dark' : 'light';
 
   return (
     <header
@@ -78,7 +77,7 @@ export function TopBar() {
             value={tab}
             onChange={setTab}
             options={TABS}
-            label="View"
+            label="Dashboard views"
           />
         </div>
 
@@ -115,11 +114,11 @@ export function TopBar() {
             onChange={setCurrency}
             options={CURRENCY_ORDER.map((code) => ({
               value: code,
-              label: `${code} ${CURRENCIES[code].symbol}`,
+              label: `${code} — ${CURRENCIES[code].label} (${CURRENCIES[code].symbol})`,
             }))}
           />
           <IconButton
-            label={`Theme: ${themeLabel(mode)} (${resolved}). Switch to ${themeLabel(NEXT_THEME[mode])}.`}
+            label={`Theme: ${themeLabel(mode)}. Switch to ${themeLabel(NEXT_THEME[mode])}.`}
             icon={themeIcon}
             onClick={cycle}
           />

@@ -113,7 +113,7 @@ export function UnitEconomicsPanel() {
               label="Lifetime value"
               value={ltv.value ?? 0}
               max={max}
-              display={present(ltv, (value) => fmt.money(value)).display}
+              display={present(ltv, (value) => fmt.money(value, 0)).display}
               color="var(--series-1)"
               note={ltv.reason}
             />
@@ -123,7 +123,7 @@ export function UnitEconomicsPanel() {
               max={max}
               display={present(cac, (value) => fmt.money(value, 0)).display}
               color="var(--series-2)"
-              note={cac.reason ?? (cac.value === 0 ? 'Acquisition is costing you nothing in the model.' : undefined)}
+              note={cac.reason ?? (cac.value === 0 ? 'Acquisition cost is zero in your current assumptions.' : undefined)}
             />
           </div>
 
@@ -161,7 +161,7 @@ export function UnitEconomicsPanel() {
           />
           <StatRow
             label="Lifetime value"
-            value={present(ltv, (value) => fmt.money(value)).display}
+            value={present(ltv, (value) => fmt.money(value, 0)).display}
             tone="accent"
             strong
           />

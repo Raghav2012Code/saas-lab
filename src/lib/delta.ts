@@ -25,7 +25,7 @@ export function relativeDelta(
   higherIsBetter = true,
 ): DeltaText | undefined {
   const base = deltaBase(from, to);
-  if (!base || 'empty' in base) return base ? { value: 0, text: 'no change', higherIsBetter } : undefined;
+  if (!base || 'empty' in base) return base ? { value: 0, text: 'No change', higherIsBetter } : undefined;
 
   const change = base.change;
 
@@ -48,7 +48,7 @@ export function pointDelta(
   higherIsBetter = true,
 ): DeltaText | undefined {
   const base = deltaBase(from, to);
-  if (!base || 'empty' in base) return base ? { value: 0, text: 'no change', higherIsBetter } : undefined;
+  if (!base || 'empty' in base) return base ? { value: 0, text: 'No change', higherIsBetter } : undefined;
   const change = base.change;
   return {
     value: change,

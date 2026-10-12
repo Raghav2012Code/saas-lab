@@ -14,7 +14,7 @@ export function OverviewTab() {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
       <SectionHeading
-        eyebrow={`Today, ${DATE.format(new Date())}`}
+        eyebrow={`Opened ${DATE.format(new Date())}`}
         title="Your SaaS at a glance"
         description="Balances are today. Growth, churn and cash flow describe the next 30 days, and everything is projected from there."
       />

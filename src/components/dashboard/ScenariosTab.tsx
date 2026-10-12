@@ -150,7 +150,7 @@ export function ScenariosTab() {
 
         title="How the same model behaves under different assumptions"
         description="Conservative and aggressive are stated multipliers, not a second model. Neither is a recommendation — the point is to see which assumptions actually move the outcome."
-        actions={<HorizonControl />}
+        actions={<HorizonControl label="Projection length for scenarios" />}
       />
 
       <Panel
@@ -285,7 +285,7 @@ export function ScenariosTab() {
                   }}
                   title="Replace your assumptions with this scenario"
                 >
-                  Use these
+                  Replace my assumptions
                 </Button>
               ) : (
                 <Pill tone="neutral">current</Pill>
@@ -293,7 +293,7 @@ export function ScenariosTab() {
             }
           >
             {scenario.changes.length === 0 ? (
-              <InlineNote>Your assumptions, unchanged.</InlineNote>
+              <InlineNote>This matches your current assumptions.</InlineNote>
             ) : (
               <ul className="flex flex-col divide-y divide-line">
                 {scenario.changes.map((change) => (
@@ -315,11 +315,9 @@ export function ScenariosTab() {
                 <span>
                   {scenario.derived.health.profitableNow
                     ? 'Cash-flow positive from the first projected month.'
-                    : `Cash runs out ${
-                        scenario.derived.health.cashOutMonth.value === null
-                          ? 'beyond the projection.'
-                          : `around month ${scenario.derived.health.cashOutMonth.value.toFixed(0)}.`
-                      }`}
+                    : scenario.derived.health.cashOutMonth.value === null
+                      ? 'Cash lasts beyond the projection.'
+                      : `Cash runs out around month ${scenario.derived.health.cashOutMonth.value.toFixed(0)}.`}
                 </span>
               </p>
             </div>

@@ -4,8 +4,8 @@ import { InfoTip } from '../ui/InfoTip';
 import { useModel } from '../../state/store';
 
 const MODE_NOTE: Record<string, string> = {
-  direct: 'New customers are entered as a flat number each month, so the funnel is not in play. Switch to Funnel in the assumptions rail to model visitors and conversion.',
-  growth: 'New customers are solved backwards from a target MRR growth rate, so they are an output rather than an input. Switch to Funnel in the assumptions rail to model visitors and conversion.',
+  direct: 'New customers are entered as a flat number each month. The funnel is not used in Flat/Target mode. Change it under Assumptions → How new customers are calculated.',
+  growth: 'New customers are calculated from a target MRR growth rate, so they are a result rather than an input. The funnel is not used in Flat/Target mode. Change it under Assumptions → How new customers are calculated.',
 };
 
 /** How customers arrive, and how well they stay. */
@@ -24,7 +24,7 @@ export function GrowthPanel() {
       formatted: fmt.number(model.monthlyVisitors),
       dropOff:
         model.monthlyVisitors > breakdown.signups
-          ? `${fmt.number(model.monthlyVisitors - breakdown.signups, 1)} never start an account`
+          ? `${fmt.number(model.monthlyVisitors - breakdown.signups, 1)} don't sign up`
           : undefined,
     },
     {
@@ -35,7 +35,7 @@ export function GrowthPanel() {
       note: `${fmt.percent(model.visitorToSignupPct)} of visitors`,
       dropOff:
         breakdown.signups > breakdown.paid
-          ? `${fmt.number(breakdown.signups - breakdown.paid, 1)} never pay`
+          ? `${fmt.number(breakdown.signups - breakdown.paid, 1)} don't convert to paid`
           : undefined,
     },
     {
@@ -69,7 +69,7 @@ export function GrowthPanel() {
                   breakdown.paid > 0 ? model.monthlyVisitors / breakdown.paid : 0,
                   1,
                 )}
-                detail="How much traffic one customer costs. Lower is a better funnel."
+                detail="How much traffic one customer costs. A lower cost per customer is better."
               />
               <StatRow
                 label="Cost per visitor"
@@ -80,7 +80,7 @@ export function GrowthPanel() {
               <StatRow
                 label="Cost per signup"
                 value={breakdown.signups > 0 ? fmt.money(acquisitionSpend / breakdown.signups, 0) : '\u2014'}
-                detail="Sales & marketing spend divided by signups, so you can see where the cost actually lands."
+                detail="Sales & marketing spend divided by signups."
               />
             </div>
           </>
