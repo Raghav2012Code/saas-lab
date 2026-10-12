@@ -466,3 +466,69 @@ describe('formatting', () => {
     expect(monthName(5)).toBe('month 5');
   });
 });
+
+import { seekGoal } from './goalSeek';
+
+describe('goal seeking', () => {
+  it('finds a single lever that reaches break-even in time', () => {
+    const base = model();
+    const result = seekGoal(base, { type: 'breakeven-by', month: 6 });
+    expect(result).toHaveProperty('field');
+    if ('field' in result) {
+      expect(Number.isFinite(result.from)).toBe(true);
+      expect(Number.isFinite(result.to)).toBe(true);
+      expect(result.from).not.toBe(result.to);
+    }
+  });
+
+  it('round-trips: applying the suggested change really meets the goal', () => {
+    const base = model();
+    const result = seekGoal(base, { type: 'breakeven-by', month: 6 });
+    if (!('field' in result)) throw new Error(`Expected a lever, got: ${JSON.stringify(result)}`);
+    const applied = analyze({ [result.field]: result.to } as Partial<Model>);
+    const months = applied.derived.health.monthsToBreakEven.value;
+    expect(applied.derived.health.profitableNow || (months !== null && (months as number) <= 6)).toBe(true);
+  });
+
+  it('reports unreachable with a reason when no single lever can do it', () => {
+    // With no starting cash the runway metric stays at zero whatever the levers do.
+    const result = seekGoal(model({ startingCash: 0 }), { type: 'runway-floor', months: 12 });
+    expect(result).toHaveProperty('unreachable');
+    if ('unreachable' in result) expect(result.unreachable).toBeTruthy();
+  });
+
+  it('handles a zero-customer model without crashing', () => {
+    const result = seekGoal(model({ startingCustomers: 0 }), { type: 'breakeven-by', month: 24 });
+    if ('field' in result) {
+      expect(Number.isFinite(result.from)).toBe(true);
+      expect(Number.isFinite(result.to)).toBe(true);
+      const applied = analyze({ [result.field]: result.to } as Partial<Model>);
+      const months = applied.derived.health.monthsToBreakEven.value;
+      expect(applied.derived.health.profitableNow || (months !== null && (months as number) <= 24)).toBe(true);
+    } else {
+      expect(result.unreachable).toBeTruthy();
+    }
+  });
+
+  it('handles an already-profitable model without crashing', () => {
+    const result = seekGoal(model({ monthlyOpex: 0, grossMarginPct: 100, arpu: 500, monthlyChurnPct: 0.5 }), {
+      type: 'breakeven-by',
+      month: 12,
+    });
+    expect(result).toHaveProperty('unreachable');
+    if ('unreachable' in result) expect(result.unreachable).toMatch(/already/i);
+  });
+
+  it('survives 100% churn without producing NaN or Infinity', () => {
+    const base = model({ monthlyChurnPct: 100 });
+    const result = seekGoal(base, { type: 'breakeven-by', month: 36 });
+    expect(result).toHaveProperty('field');
+    if ('field' in result) {
+      expect(Number.isFinite(result.from)).toBe(true);
+      expect(Number.isFinite(result.to)).toBe(true);
+      const applied = analyze({ [result.field]: result.to } as Partial<Model>);
+      const months = applied.derived.health.monthsToBreakEven.value;
+      expect(applied.derived.health.profitableNow || (months !== null && (months as number) <= 36)).toBe(true);
+    }
+  });
+});
