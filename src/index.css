@@ -960,4 +960,24 @@
   header {
     position: static !important;
   }
+  /* Snapshot view: it portals onto body, so hide the app and let the page flow as one sheet. */
+  body:has(.snapshot-view) > *:not(.snapshot-view) {
+    display: none !important;
+  }
+  .snapshot-view {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .snapshot-page {
+    max-width: none !important;
+    gap: 1rem !important;
+    padding: 0 !important;
+  }
+  .snapshot-figures > .panel > div {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  .snapshot-view .panel-body {
+    padding: 0.75rem !important;
+  }
 }

@@ -7,12 +7,14 @@ import { useModel } from '../../state/store';
 import { useToast } from '../../state/toast';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { SnapshotView } from '../dashboard/SnapshotView';
 
 /** Real exports only: three files that open cleanly, plus the print sheet. */
 export function ExportMenu() {
   const { model, derived, simulation, fmt, horizon } = useModel();
   const { notify } = useToast();
   const [open, setOpen] = useState(false);
+  const [snapshotOpen, setSnapshotOpen] = useState(false);
   const container = useRef<HTMLDivElement | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -141,6 +143,14 @@ export function ExportMenu() {
       },
     },
     {
+      id: 'snapshot',
+      label: 'Snapshot summary',
+      hint: 'One page: figures, MRR and assumptions',
+      run: () => {
+        setSnapshotOpen(true);
+      },
+    },
+    {
       id: 'print',
       label: 'Print / Save as PDF',
       hint: 'Prints the tab you are looking at',
@@ -150,6 +160,11 @@ export function ExportMenu() {
       },
     },
   ];
+
+  const closeSnapshot = () => {
+    setSnapshotOpen(false);
+    trigger.current?.focus();
+  };
 
   return (
     <div ref={container} className="relative">
@@ -202,6 +217,8 @@ export function ExportMenu() {
           ))}
         </div>
       ) : null}
+
+      {snapshotOpen ? <SnapshotView onClose={closeSnapshot} /> : null}
     </div>
   );
 }
