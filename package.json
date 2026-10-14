@@ -1,7 +1,7 @@
 {
   "name": "saas-calculator",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "One coherent SaaS financial model: assumptions in, every metric out.",
   "type": "module",
   "scripts": {
